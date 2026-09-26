@@ -1,12 +1,16 @@
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&display=swap');
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
 :root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'General Sans', Inter, system-ui, sans-serif;
+  color: #2E2416;
+  background: #FBF6EC;
 }
 
 h1, h2, h3, .font-heading {
-  font-family: 'Outfit', 'Inter', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
 }
 
 /* Custom scrollbars */
@@ -15,27 +19,27 @@ h1, h2, h3, .font-heading {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(240, 224, 196, 0.55);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(79, 70, 229, 0.4);
+  background: rgba(201, 151, 43, 0.45);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 70, 229, 0.7);
+  background: rgba(156, 110, 28, 0.7);
 }
 
 /* Glassmorphism helpers */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(255, 253, 248, 0.68);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(201, 151, 43, 0.22);
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(255, 253, 248, 0.62);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(201, 151, 43, 0.18);
 }

@@ -52,18 +52,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       {/* Header and Dynamic Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-ink tracking-tight">
             Inventory Telemetry & Operations
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-muted mt-1">
             Real-time balance derivation, pending fulfillment pipeline, and automated reorder triggers.
           </p>
         </div>
 
         {/* Dynamic Filters Bar */}
-        <div className="flex flex-wrap items-center gap-2.5 glass-panel p-2 rounded-xl border border-slate-800">
-          <div className="flex items-center gap-1.5 px-2 text-xs font-semibold text-slate-400">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
+        <div className="flex flex-wrap items-center gap-2.5 glass-panel p-2 rounded-xl border border-biscuit">
+          <div className="flex items-center gap-1.5 px-2 text-xs font-semibold text-muted">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-brand-700" />
             <span>Filters:</span>
           </div>
 
@@ -71,7 +71,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <select
             value={selectedWarehouse}
             onChange={(e) => setSelectedWarehouse(e.target.value)}
-            className="bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="bg-surface border border-brand-200/80 rounded-lg px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-brand-500 transition-colors"
             aria-label="Filter by Warehouse"
           >
             <option value="">All Warehouses</option>
@@ -86,7 +86,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="bg-surface border border-brand-200/80 rounded-lg px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-brand-500 transition-colors"
             aria-label="Filter by Category"
           >
             <option value="">All Categories</option>
@@ -103,7 +103,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 setSelectedWarehouse('');
                 setSelectedCategory('');
               }}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 transition-colors"
+              className="text-xs text-brand-700 hover:text-brand-700 font-medium px-2 py-1 transition-colors"
             >
               Reset
             </button>
@@ -111,19 +111,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => void fetchKPIs()}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+            className="p-1.5 rounded-lg bg-biscuit hover:bg-brand-200 text-ink transition-colors"
             title="Refresh KPIs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-brand-700' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* Reorder Notification Banner (if any) */}
       {reorderStatusMsg && (
-        <div role="status" aria-live="polite" className="p-3.5 rounded-xl bg-indigo-950/80 border border-indigo-500/40 text-sm text-indigo-200 flex items-center justify-between animate-in fade-in">
+        <div role="status" aria-live="polite" className="p-3.5 rounded-xl bg-brand-100/80 border border-brand-300/60 text-sm text-ink flex items-center justify-between animate-in fade-in">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+            <Sparkles className="w-4 h-4 text-brand-700 flex-shrink-0" />
             <span>{reorderStatusMsg}</span>
           </div>
           <button
@@ -181,17 +181,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
       {/* Reorder Alerts & Replenishment Trigger */}
       {kpis && kpis.reorder_alerts.length > 0 && (
-        <div className="glass-panel p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-slate-900 to-slate-900">
+        <div className="glass-panel p-5 rounded-2xl border border-brand-500/30 bg-gradient-to-r from-brand-100/70 via-surface to-surface">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+              <div className="p-2.5 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-700">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-bold text-ink flex items-center gap-2">
                   Reorder Threshold Alerts ({kpis.reorder_alerts.length} items below minimum)
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-muted mt-0.5">
                   Stock levels have dropped below defined safety thresholds. Generate automated replenishment receipts.
                 </p>
               </div>
@@ -200,7 +200,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             {isManager && (
               <button
                 onClick={handleTriggerReorders}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 shadow-lg shadow-amber-500/20 transition-all font-sans"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-brand-400 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-ink shadow-lg shadow-brand-500/20 transition-all font-sans"
               >
                 <Sparkles className="w-4 h-4" />
                 Auto-Generate Draft Receipts
@@ -212,16 +212,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             {kpis.reorder_alerts.slice(0, 3).map((alert) => (
               <div
                 key={alert.product_id}
-                className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs flex items-center justify-between"
+                className="p-3 rounded-xl bg-surface/90 border border-biscuit text-xs flex items-center justify-between"
               >
                 <div>
-                  <p className="font-semibold text-slate-200">{alert.name}</p>
-                  <p className="text-[11px] text-slate-500 font-mono">{alert.sku}</p>
+                  <p className="font-semibold text-ink">{alert.name}</p>
+                  <p className="text-[11px] text-muted font-mono">{alert.sku}</p>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-amber-400">{alert.current_stock}</span>
-                  <span className="text-slate-500"> / min {alert.min_stock_level} {alert.uom}</span>
-                  <p className="text-[10px] text-indigo-400">Restock +{alert.suggested_order_qty}</p>
+                  <span className="font-bold text-brand-700">{alert.current_stock}</span>
+                  <span className="text-muted"> / min {alert.min_stock_level} {alert.uom}</span>
+                  <p className="text-[10px] text-brand-700">Restock +{alert.suggested_order_qty}</p>
                 </div>
               </div>
             ))}
@@ -230,79 +230,79 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       )}
 
       {/* Quick Operations Launchpad */}
-      <div className="glass-panel p-5 rounded-2xl border border-slate-800">
-        <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-indigo-400" /> Quick Operations Launchpad
+      <div className="glass-panel p-5 rounded-2xl border border-biscuit">
+        <h2 className="text-base font-bold text-ink mb-3 flex items-center gap-2">
+          <Layers className="w-4 h-4 text-brand-700" /> Quick Operations Launchpad
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <button
             onClick={() => onNavigate('operations', { openModal: 'RECEIPT' })}
-            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-left transition-all group"
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-surface/80 hover:bg-biscuit border border-biscuit hover:border-brand-500/40 text-left transition-all group"
           >
-            <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-lg bg-sage-500/10 text-sage-700 border border-sage-500/20 group-hover:scale-105 transition-transform">
               <ArrowDownLeft className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-semibold text-xs text-white">Receive Goods</p>
-              <p className="text-[11px] text-slate-400">Vendor → Warehouse</p>
+              <p className="font-semibold text-xs text-ink">Receive Goods</p>
+              <p className="text-[11px] text-muted">Vendor → Warehouse</p>
             </div>
           </button>
 
           <button
             onClick={() => onNavigate('operations', { openModal: 'DELIVERY' })}
-            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-left transition-all group"
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-surface/80 hover:bg-biscuit border border-biscuit hover:border-brand-500/40 text-left transition-all group"
           >
-            <div className="p-2.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-lg bg-plum-500/10 text-plum-700 border border-plum-500/20 group-hover:scale-105 transition-transform">
               <ArrowUpRight className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-semibold text-xs text-white">Dispatch Order</p>
-              <p className="text-[11px] text-slate-400">Warehouse → Customer</p>
+              <p className="font-semibold text-xs text-ink">Dispatch Order</p>
+              <p className="text-[11px] text-muted">Warehouse → Customer</p>
             </div>
           </button>
 
           <button
             onClick={() => onNavigate('operations', { openModal: 'INTERNAL' })}
-            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-left transition-all group"
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-surface/80 hover:bg-biscuit border border-biscuit hover:border-brand-500/40 text-left transition-all group"
           >
-            <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-lg bg-brand-500/10 text-brand-700 border border-brand-500/20 group-hover:scale-105 transition-transform">
               <RefreshCw className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-semibold text-xs text-white">Internal Transfer</p>
-              <p className="text-[11px] text-slate-400">Location A → Location B</p>
+              <p className="font-semibold text-xs text-ink">Internal Transfer</p>
+              <p className="text-[11px] text-muted">Location A → Location B</p>
             </div>
           </button>
 
           <button
             onClick={() => onNavigate('operations', { openModal: 'ADJUSTMENT' })}
-            className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-left transition-all group"
+            className="flex items-center gap-3 p-3.5 rounded-xl bg-surface/80 hover:bg-biscuit border border-biscuit hover:border-brand-500/40 text-left transition-all group"
           >
-            <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-lg bg-brand-500/10 text-brand-700 border border-brand-500/20 group-hover:scale-105 transition-transform">
               <SlidersHorizontal className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-semibold text-xs text-white">Physical Count</p>
-              <p className="text-[11px] text-slate-400">Stock Adjustment & Reasons</p>
+              <p className="font-semibold text-xs text-ink">Physical Count</p>
+              <p className="text-[11px] text-muted">Stock Adjustment & Reasons</p>
             </div>
           </button>
         </div>
       </div>
 
       {/* Recent Ledger Audit Telemetry Table */}
-      <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+      <div className="glass-panel rounded-2xl border border-biscuit overflow-hidden">
+        <div className="p-5 border-b border-biscuit flex items-center justify-between">
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-emerald-400" /> Recent Stock Ledger Movements
+            <h2 className="text-base font-bold text-ink flex items-center gap-2">
+              <Clock className="w-4 h-4 text-sage-700" /> Recent Stock Ledger Movements
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Live audit trail directly recorded from the append-only stock ledger.
             </p>
           </div>
           <button
             onClick={() => onNavigate('history')}
-            className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+            className="flex items-center gap-1.5 text-xs text-brand-700 hover:text-brand-700 font-semibold transition-colors"
           >
             View Full Ledger <ArrowRight className="w-3.5 h-3.5" />
           </button>
@@ -310,7 +310,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+            <thead className="bg-surface/90 text-muted uppercase tracking-wider font-semibold border-b border-biscuit">
               <tr>
                 <th scope="col" className="py-3 px-4">Timestamp</th>
                 <th scope="col" className="py-3 px-4">Reference</th>
@@ -321,41 +321,41 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 <th scope="col" className="py-3 px-4">Logged By</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-biscuit/60 font-medium">
               {kpis?.recent_activities && kpis.recent_activities.length > 0 ? (
                 kpis.recent_activities.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                  <tr key={entry.id} className="hover:bg-biscuit/40 transition-colors">
+                    <td className="py-3 px-4 text-muted font-mono text-[11px]">
                       {new Date(entry.timestamp).toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 font-mono font-semibold text-indigo-300">
+                    <td className="py-3 px-4 font-mono font-semibold text-brand-700">
                       {entry.operation_reference || 'MANUAL-TX'}
                     </td>
-                    <td className="py-3 px-4 text-slate-200">
+                    <td className="py-3 px-4 text-ink">
                       <div className="font-semibold">{entry.product_name}</div>
-                      <div className="text-[11px] text-slate-500 font-mono">{entry.product_sku}</div>
+                      <div className="text-[11px] text-muted font-mono">{entry.product_sku}</div>
                     </td>
-                    <td className="py-3 px-4 text-slate-300">
-                      <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/60 text-[11px]">
+                    <td className="py-3 px-4 text-ink">
+                      <span className="px-2 py-0.5 rounded bg-biscuit border border-brand-200/60 text-[11px]">
                         {entry.from_location_name}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-300">
-                      <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/60 text-[11px]">
+                    <td className="py-3 px-4 text-ink">
+                      <span className="px-2 py-0.5 rounded bg-biscuit border border-brand-200/60 text-[11px]">
                         {entry.to_location_name}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right font-bold text-white font-mono">
-                      {entry.quantity} <span className="text-[10px] font-normal text-slate-400">{entry.uom}</span>
+                    <td className="py-3 px-4 text-right font-bold text-ink font-mono">
+                      {entry.quantity} <span className="text-[10px] font-normal text-muted">{entry.uom}</span>
                     </td>
-                    <td className="py-3 px-4 text-slate-400">
+                    <td className="py-3 px-4 text-muted">
                       {entry.user_name || 'System'}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">
+                  <td colSpan={7} className="py-8 text-center text-muted">
                     No ledger transactions recorded yet. Run a receipt or transfer to begin.
                   </td>
                 </tr>

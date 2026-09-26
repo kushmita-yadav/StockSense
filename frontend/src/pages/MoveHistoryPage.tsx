@@ -16,10 +16,10 @@ interface LedgerResponse {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  RECEIPT: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  DELIVERY: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-  INTERNAL: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
-  ADJUSTMENT: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  RECEIPT: 'bg-sage-500/15 text-sage-700 border-sage-500/30',
+  DELIVERY: 'bg-plum-500/15 text-plum-700 border-plum-500/30',
+  INTERNAL: 'bg-brand-500/15 text-brand-700 border-brand-500/30',
+  ADJUSTMENT: 'bg-brand-400/15 text-brand-700 border-brand-400/30',
 }
 
 export const MoveHistoryPage: React.FC = () => {
@@ -52,17 +52,17 @@ export const MoveHistoryPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-extrabold text-white flex items-center gap-2.5">
-            <History className="w-6 h-6 text-indigo-400" />
+          <h1 className="font-heading text-2xl font-extrabold text-ink flex items-center gap-2.5">
+            <History className="w-6 h-6 text-brand-700" />
             Move History
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-muted mt-0.5">
             Append-only stock ledger — {total.toLocaleString()} movement{total !== 1 ? 's' : ''} recorded
           </p>
         </div>
         <button
           onClick={() => refetch()}
-          className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+          className="p-2.5 rounded-xl bg-surface/80 border border-brand-200/80 text-muted hover:text-ink hover:bg-biscuit transition-colors"
           aria-label="Refresh ledger"
         >
           <RefreshCw className="w-4 h-4" />
@@ -72,23 +72,23 @@ export const MoveHistoryPage: React.FC = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" aria-hidden="true" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
           <input
             type="search"
             aria-label="Search by product"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Search by product name or SKU…"
-            className="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/70 transition-all"
+            className="w-full bg-surface/80 border border-brand-200/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/70 transition-all"
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-500 flex-shrink-0" aria-hidden="true" />
+          <Filter className="w-4 h-4 text-muted flex-shrink-0" aria-hidden="true" />
           <select
             aria-label="Filter by operation type"
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }}
-            className="bg-slate-900/80 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="bg-surface/80 border border-brand-200/80 rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all"
           >
             <option value="">All Types</option>
             <option value="RECEIPT">Receipt</option>
@@ -100,7 +100,7 @@ export const MoveHistoryPage: React.FC = () => {
             aria-label="Filter by location"
             value={locationFilter}
             onChange={(e) => { setLocationFilter(e.target.value); setPage(1) }}
-            className="bg-slate-900/80 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="bg-surface/80 border border-brand-200/80 rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all"
           >
             <option value="">All Locations</option>
             {warehouses.flatMap((warehouse) => warehouse.locations.map((location) => (
@@ -111,26 +111,26 @@ export const MoveHistoryPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="glass-panel rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="glass-panel rounded-2xl border border-brand-200/60 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/50">
-                <th scope="col" className="py-3 pl-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Timestamp</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Type</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Product</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Movement</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">Quantity</th>
-                <th scope="col" className="py-3 pr-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Reference</th>
+              <tr className="border-b border-biscuit bg-surface/50">
+                <th scope="col" className="py-3 pl-4 text-xs font-semibold uppercase tracking-wider text-muted">Timestamp</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted">Type</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted">Product</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted">Movement</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted text-right">Quantity</th>
+                <th scope="col" className="py-3 pr-4 text-xs font-semibold uppercase tracking-wider text-muted">Reference</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} className="border-b border-slate-800/60">
+                  <tr key={i} className="border-b border-biscuit/60">
                     {Array.from({ length: 6 }).map((_, j) => (
                       <td key={j} className="py-4 px-4">
-                        <div className="h-4 bg-slate-800 rounded animate-pulse" style={{ width: `${60 + j * 10}%` }} />
+                        <div className="h-4 bg-biscuit rounded animate-pulse" style={{ width: `${60 + j * 10}%` }} />
                       </td>
                     ))}
                   </tr>
@@ -138,50 +138,50 @@ export const MoveHistoryPage: React.FC = () => {
               ) : entries.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center">
-                    <Package className="w-10 h-10 mx-auto text-slate-600 mb-3" />
-                    <p className="text-slate-400 font-medium">No ledger entries found</p>
-                    <p className="text-slate-600 text-sm mt-1">
+                    <Package className="w-10 h-10 mx-auto text-muted mb-3" />
+                    <p className="text-muted font-medium">No ledger entries found</p>
+                    <p className="text-muted text-sm mt-1">
                       {search || typeFilter ? 'Try clearing your filters.' : 'Stock movements will appear here once operations are validated.'}
                     </p>
                   </td>
                 </tr>
               ) : (
                 entries.map((entry) => (
-                  <tr key={entry.id} className="border-b border-slate-800/60 hover:bg-slate-800/20 transition-colors group">
+                  <tr key={entry.id} className="border-b border-biscuit/60 hover:bg-biscuit/20 transition-colors group">
                     <td className="py-3.5 pl-4">
-                      <p className="text-sm text-slate-200">
+                      <p className="text-sm text-ink">
                         {new Date(entry.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
-                      <p className="text-xs text-slate-600">
+                      <p className="text-xs text-muted">
                         {new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </td>
                     <td className="py-3.5">
                       {entry.operation_type && (
-                        <span className={`status-badge border text-[11px] ${TYPE_COLORS[entry.operation_type] ?? 'bg-slate-700 text-slate-300 border-slate-600'}`}>
+                        <span className={`status-badge border text-[11px] ${TYPE_COLORS[entry.operation_type] ?? 'bg-brand-200 text-ink border-muted'}`}>
                           {entry.operation_type}
                         </span>
                       )}
                     </td>
                     <td className="py-3.5">
-                      <p className="text-sm text-slate-200 font-medium">{entry.product_name ?? '—'}</p>
-                      <p className="text-xs text-slate-500 font-mono mt-0.5">{entry.product_sku}</p>
+                      <p className="text-sm text-ink font-medium">{entry.product_name ?? '—'}</p>
+                      <p className="text-xs text-muted font-mono mt-0.5">{entry.product_sku}</p>
                     </td>
                     <td className="py-3.5">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                        <span className="truncate max-w-[120px]">{entry.from_location_name ?? <span className="italic text-slate-600">External</span>}</span>
-                        <ArrowRightCircle className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
-                        <span className="truncate max-w-[120px]">{entry.to_location_name ?? <span className="italic text-slate-600">External</span>}</span>
+                      <div className="flex items-center gap-1.5 text-xs text-muted">
+                        <span className="truncate max-w-[120px]">{entry.from_location_name ?? <span className="italic text-muted">External</span>}</span>
+                        <ArrowRightCircle className="w-3.5 h-3.5 text-muted flex-shrink-0" />
+                        <span className="truncate max-w-[120px]">{entry.to_location_name ?? <span className="italic text-muted">External</span>}</span>
                       </div>
                     </td>
                     <td className="py-3.5 text-right">
-                      <p className="font-mono font-bold text-sm text-emerald-400">
+                      <p className="font-mono font-bold text-sm text-sage-700">
                         {entry.quantity.toLocaleString()} {entry.uom}
                       </p>
                     </td>
                     <td className="py-3.5 pr-4">
-                      <p className="text-xs font-mono text-slate-400 truncate max-w-[160px]">{entry.operation_reference ?? entry.operation_id}</p>
-                      <p className="text-xs text-slate-600 truncate">{entry.user_name}</p>
+                      <p className="text-xs font-mono text-muted truncate max-w-[160px]">{entry.operation_reference ?? entry.operation_id}</p>
+                      <p className="text-xs text-muted truncate">{entry.user_name}</p>
                     </td>
                   </tr>
                 ))
@@ -192,15 +192,15 @@ export const MoveHistoryPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-slate-800 flex items-center justify-between">
-            <p className="text-xs text-slate-400">
+          <div className="px-4 py-3 border-t border-biscuit flex items-center justify-between">
+            <p className="text-xs text-muted">
               Showing {((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)} of {total.toLocaleString()} entries
             </p>
             <div className="flex gap-1.5">
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-biscuit hover:bg-brand-200 text-ink disabled:opacity-40 transition-colors"
               >
                 <ChevronLeft className="w-3.5 h-3.5" /> Prev
               </button>
@@ -213,8 +213,8 @@ export const MoveHistoryPage: React.FC = () => {
                       onClick={() => setPage(pageNum)}
                       className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
                         pageNum === page
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                          ? 'bg-brand-600 text-ink'
+                          : 'bg-biscuit hover:bg-brand-200 text-ink'
                       }`}
                     >
                       {pageNum}
@@ -225,7 +225,7 @@ export const MoveHistoryPage: React.FC = () => {
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-biscuit hover:bg-brand-200 text-ink disabled:opacity-40 transition-colors"
               >
                 Next <ChevronRight className="w-3.5 h-3.5" />
               </button>

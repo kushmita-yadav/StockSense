@@ -20,15 +20,15 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-14 h-14">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-emerald-400 animate-pulse" />
-            <div className="absolute inset-1 rounded-xl bg-slate-950 flex items-center justify-center">
-              <div className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-sage-400 animate-pulse" />
+            <div className="absolute inset-1 rounded-xl bg-brand-50 flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
             </div>
           </div>
-          <p className="text-sm text-slate-400 font-medium animate-pulse">Initializing StockSense…</p>
+          <p className="text-sm text-muted font-medium animate-pulse">Initializing StockSense…</p>
         </div>
       </div>
     )
@@ -64,7 +64,7 @@ export default function App() {
         return <MoveHistoryPage />
       case 'warehouses':
         return isManager ? <WarehousesPage /> : (
-          <div className="flex items-center justify-center h-64 text-slate-400">
+          <div className="flex items-center justify-center h-64 text-muted">
             Access denied: Warehouse management requires Inventory Manager role.
           </div>
         )
@@ -74,11 +74,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-brand-50">
       {/* Ambient gradient background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-600/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-sage-600/5 rounded-full blur-3xl" />
       </div>
 
       <Navbar

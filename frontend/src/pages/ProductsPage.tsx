@@ -20,10 +20,10 @@ interface ProductModalProps {
 /* ─── Stock Status Badge ─── */
 const StockBadge: React.FC<{ product: Product }> = ({ product }) => {
   if (product.total_on_hand === 0)
-    return <span className="status-badge bg-rose-500/15 text-rose-400 border border-rose-500/30">Out of Stock</span>
+    return <span className="status-badge bg-clay-500/15 text-clay-700 border border-clay-500/30">Out of Stock</span>
   if (product.total_on_hand <= product.min_stock_level)
-    return <span className="status-badge bg-amber-500/15 text-amber-400 border border-amber-500/30">Low Stock</span>
-  return <span className="status-badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">In Stock</span>
+    return <span className="status-badge bg-brand-500/15 text-brand-700 border border-brand-500/30">Low Stock</span>
+  return <span className="status-badge bg-sage-500/15 text-sage-700 border border-sage-500/30">In Stock</span>
 }
 
 /* ─── Product Modal ─── */
@@ -60,11 +60,11 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
     onError: (err: any) => setError(err.message || 'Failed to save product.'),
   })
 
-  const inputCls = 'w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/70 transition-all'
+  const inputCls = 'w-full bg-surface/80 border border-brand-200/80 rounded-xl px-4 py-2.5 text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/70 transition-all'
 
   return (
     <>
-      <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50" onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0 bg-brand-50/70 backdrop-blur-sm z-50" onClick={onClose} aria-hidden="true" />
       <div
         ref={dialogRef}
         role="dialog"
@@ -73,18 +73,18 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
         tabIndex={-1}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
-        <div className="w-full max-w-md glass-panel rounded-2xl border border-slate-700/80 shadow-2xl p-6">
+        <div className="w-full max-w-md glass-panel rounded-2xl border border-brand-200/80 shadow-2xl p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-heading font-bold text-white text-lg">
+            <h2 className="font-heading font-bold text-ink text-lg">
               {product ? 'Edit Product' : 'New Product'}
             </h2>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" aria-label="Close modal">
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-biscuit text-muted hover:text-ink transition-colors" aria-label="Close modal">
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {error && (
-            <div role="alert" className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-sm text-rose-300 flex items-start gap-2">
+            <div role="alert" className="mb-4 p-3 rounded-xl bg-clay-500/10 border border-clay-500/30 text-sm text-clay-700 flex items-start gap-2">
               <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               {error}
             </div>
@@ -97,22 +97,22 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
           >
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="prod-sku" className="block text-xs font-semibold text-slate-300 mb-1">SKU *</label>
+                <label htmlFor="prod-sku" className="block text-xs font-semibold text-ink mb-1">SKU *</label>
                 <input id="prod-sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="STL-ROD-001" required className={inputCls} />
               </div>
               <div>
-                <label htmlFor="prod-uom" className="block text-xs font-semibold text-slate-300 mb-1">Unit of Measure *</label>
+                <label htmlFor="prod-uom" className="block text-xs font-semibold text-ink mb-1">Unit of Measure *</label>
                 <input id="prod-uom" value={uom} onChange={(e) => setUom(e.target.value)} placeholder="Units" required className={inputCls} />
               </div>
             </div>
 
             <div>
-              <label htmlFor="prod-name" className="block text-xs font-semibold text-slate-300 mb-1">Product Name *</label>
+              <label htmlFor="prod-name" className="block text-xs font-semibold text-ink mb-1">Product Name *</label>
               <input id="prod-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Steel Rod 12mm" required className={inputCls} />
             </div>
 
             <div>
-              <label htmlFor="prod-cat" className="block text-xs font-semibold text-slate-300 mb-1">Category</label>
+              <label htmlFor="prod-cat" className="block text-xs font-semibold text-ink mb-1">Category</label>
               <select id="prod-cat" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>
                 <option value="">No category</option>
                 {categories.map((c) => (
@@ -123,23 +123,23 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, categories, onClos
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="prod-min" className="block text-xs font-semibold text-slate-300 mb-1">Min Stock Level</label>
+                <label htmlFor="prod-min" className="block text-xs font-semibold text-ink mb-1">Min Stock Level</label>
                 <input id="prod-min" type="number" min="0" value={minStock} onChange={(e) => setMinStock(e.target.value)} placeholder="0" className={inputCls} />
               </div>
               <div>
-                <label htmlFor="prod-max" className="block text-xs font-semibold text-slate-300 mb-1">Max Stock Level</label>
+                <label htmlFor="prod-max" className="block text-xs font-semibold text-ink mb-1">Max Stock Level</label>
                 <input id="prod-max" type="number" min="0" value={maxStock} onChange={(e) => setMaxStock(e.target.value)} placeholder="Optional" className={inputCls} />
               </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors">
+              <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-medium text-ink bg-biscuit hover:bg-brand-200 border border-brand-200 transition-colors">
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending || !sku || !name}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-ink shadow-lg shadow-brand-500/25 transition-all disabled:opacity-60"
               >
                 {mutation.isPending
                   ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</>
@@ -160,11 +160,11 @@ const ProductRow: React.FC<{ product: Product; onEdit: () => void; isManager: bo
 
   return (
     <>
-      <tr className="border-b border-slate-800/60 hover:bg-slate-800/30 transition-colors group">
+      <tr className="border-b border-biscuit/60 hover:bg-biscuit/30 transition-colors group">
         <td className="py-3.5 pl-4 pr-2">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="p-1 rounded hover:bg-slate-700 text-slate-500 hover:text-slate-300 transition-colors"
+            className="p-1 rounded hover:bg-brand-200 text-muted hover:text-ink transition-colors"
             aria-label={expanded ? 'Collapse stock details' : 'Expand stock details'}
             aria-expanded={expanded}
           >
@@ -172,21 +172,21 @@ const ProductRow: React.FC<{ product: Product; onEdit: () => void; isManager: bo
           </button>
         </td>
         <td className="py-3.5">
-          <p className="font-semibold text-sm text-slate-200 group-hover:text-white transition-colors">{product.name}</p>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">{product.sku}</p>
+          <p className="font-semibold text-sm text-ink group-hover:text-ink transition-colors">{product.name}</p>
+          <p className="text-xs text-muted font-mono mt-0.5">{product.sku}</p>
         </td>
         <td className="py-3.5">
-          <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-slate-700">
+          <span className="text-xs px-2 py-0.5 rounded-md bg-biscuit text-muted border border-brand-200">
             {product.category_name ?? '—'}
           </span>
         </td>
         <td className="py-3.5 text-right">
-          <p className="font-semibold text-sm text-slate-200">{product.total_on_hand.toLocaleString()}</p>
-          <p className="text-xs text-slate-500">{product.uom}</p>
+          <p className="font-semibold text-sm text-ink">{product.total_on_hand.toLocaleString()}</p>
+          <p className="text-xs text-muted">{product.uom}</p>
         </td>
-        <td className="py-3.5 text-right text-slate-400 text-sm">{product.total_reserved.toLocaleString()}</td>
+        <td className="py-3.5 text-right text-muted text-sm">{product.total_reserved.toLocaleString()}</td>
         <td className="py-3.5 text-right">
-          <p className="text-sm font-semibold text-emerald-400">{product.total_available.toLocaleString()}</p>
+          <p className="text-sm font-semibold text-sage-700">{product.total_available.toLocaleString()}</p>
         </td>
         <td className="py-3.5 text-center">
           <StockBadge product={product} />
@@ -195,7 +195,7 @@ const ProductRow: React.FC<{ product: Product; onEdit: () => void; isManager: bo
           {isManager && (
             <button
               onClick={onEdit}
-              className="p-1.5 rounded-lg hover:bg-indigo-500/20 text-slate-500 hover:text-indigo-400 transition-colors opacity-0 group-hover:opacity-100"
+              className="p-1.5 rounded-lg hover:bg-brand-500/20 text-muted hover:text-brand-700 transition-colors opacity-0 group-hover:opacity-100"
               aria-label={`Edit ${product.name}`}
             >
               <Edit2 className="w-4 h-4" />
@@ -206,24 +206,24 @@ const ProductRow: React.FC<{ product: Product; onEdit: () => void; isManager: bo
 
       {/* Expandable: per-location stock breakdown */}
       {expanded && (
-        <tr className="bg-slate-900/40 border-b border-slate-800/60">
+        <tr className="bg-surface/40 border-b border-biscuit/60">
           <td colSpan={8} className="px-8 py-3">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
               Stock by Location — {product.name}
             </p>
             {product.stock_by_location.length === 0 ? (
-              <p className="text-xs text-slate-500 italic">No stock recorded in any location.</p>
+              <p className="text-xs text-muted italic">No stock recorded in any location.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {product.stock_by_location.map((loc) => (
                   <div
                     key={loc.location_id}
-                    className="px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs"
+                    className="px-3 py-2 rounded-lg bg-biscuit/80 border border-brand-200/60 text-xs"
                   >
-                    <p className="font-semibold text-slate-300">{loc.location_name}</p>
-                    <p className="text-slate-500 text-[11px]">{loc.warehouse_name}</p>
-                    <p className="mt-1 font-mono text-emerald-400 font-bold">{loc.on_hand.toLocaleString()} {product.uom}</p>
-                    <p className="text-slate-600 text-[10px]">reserved: {loc.reserved} · avail: {loc.available}</p>
+                    <p className="font-semibold text-ink">{loc.location_name}</p>
+                    <p className="text-muted text-[11px]">{loc.warehouse_name}</p>
+                    <p className="mt-1 font-mono text-sage-700 font-bold">{loc.on_hand.toLocaleString()} {product.uom}</p>
+                    <p className="text-muted text-[10px]">reserved: {loc.reserved} · avail: {loc.available}</p>
                   </div>
                 ))}
               </div>
@@ -258,18 +258,18 @@ export const ProductsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-extrabold text-white flex items-center gap-2.5">
-            <Package className="w-6 h-6 text-indigo-400" />
+          <h1 className="font-heading text-2xl font-extrabold text-ink flex items-center gap-2.5">
+            <Package className="w-6 h-6 text-brand-700" />
             Products
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-muted mt-0.5">
             {total.toLocaleString()} product{total !== 1 ? 's' : ''} in catalogue
           </p>
         </div>
         {isManager && (
           <button
             onClick={() => { setEditProduct(undefined); setModalOpen(true) }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-ink shadow-lg shadow-brand-500/25 transition-all"
           >
             <Plus className="w-4 h-4" /> New Product
           </button>
@@ -279,23 +279,23 @@ export const ProductsPage: React.FC = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" aria-hidden="true" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
           <input
             type="search"
             aria-label="Search products"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Search by name or SKU…"
-            className="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/70 transition-all"
+            className="w-full bg-surface/80 border border-brand-200/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/70 transition-all"
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-500 flex-shrink-0" aria-hidden="true" />
+          <Filter className="w-4 h-4 text-muted flex-shrink-0" aria-hidden="true" />
           <select
             aria-label="Filter by category"
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setPage(1) }}
-            className="bg-slate-900/80 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="bg-surface/80 border border-brand-200/80 rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all"
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
@@ -304,7 +304,7 @@ export const ProductsPage: React.FC = () => {
           </select>
           <button
             onClick={() => refetch()}
-            className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            className="p-2.5 rounded-xl bg-surface/80 border border-brand-200/80 text-muted hover:text-ink hover:bg-biscuit transition-colors"
             aria-label="Refresh products"
           >
             <RefreshCw className="w-4 h-4" />
@@ -313,28 +313,28 @@ export const ProductsPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="glass-panel rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="glass-panel rounded-2xl border border-brand-200/60 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/50">
+              <tr className="border-b border-biscuit bg-surface/50">
                 <th scope="col" className="py-3 pl-4 pr-2 w-10" aria-label="Expand" />
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Product</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Category</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">On-Hand</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">Reserved</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 text-right">Available</th>
-                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 text-center">Status</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted">Product</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted">Category</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted text-right">On-Hand</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted text-right">Reserved</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted text-right">Available</th>
+                <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wider text-muted text-center">Status</th>
                 <th scope="col" className="py-3 pr-4 w-12" aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-slate-800/60">
+                  <tr key={i} className="border-b border-biscuit/60">
                     {Array.from({ length: 8 }).map((_, j) => (
                       <td key={j} className="py-4 px-3">
-                        <div className="h-4 bg-slate-800 rounded animate-pulse" />
+                        <div className="h-4 bg-biscuit rounded animate-pulse" />
                       </td>
                     ))}
                   </tr>
@@ -342,9 +342,9 @@ export const ProductsPage: React.FC = () => {
               ) : products.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-16 text-center">
-                    <Layers className="w-10 h-10 mx-auto text-slate-600 mb-3" />
-                    <p className="text-slate-400 font-medium">No products found</p>
-                    <p className="text-slate-600 text-sm mt-1">
+                    <Layers className="w-10 h-10 mx-auto text-muted mb-3" />
+                    <p className="text-muted font-medium">No products found</p>
+                    <p className="text-muted text-sm mt-1">
                       {search || categoryFilter ? 'Try clearing your filters.' : isManager ? 'Create your first product above.' : 'Products will appear here.'}
                     </p>
                   </td>
@@ -365,20 +365,20 @@ export const ProductsPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+          <div className="px-4 py-3 border-t border-biscuit flex items-center justify-between text-xs text-muted">
             <span>Page {page} of {totalPages} · {total} total</span>
             <div className="flex gap-1.5">
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-biscuit hover:bg-brand-200 disabled:opacity-40 transition-colors"
               >
                 ← Prev
               </button>
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-biscuit hover:bg-brand-200 disabled:opacity-40 transition-colors"
               >
                 Next →
               </button>

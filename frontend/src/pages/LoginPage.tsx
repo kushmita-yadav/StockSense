@@ -114,42 +114,45 @@ export const LoginPage: React.FC = () => {
   }
 
   const inputCls =
-    'w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/70 transition-all'
+    'w-full bg-surface/80 border border-brand-200/80 rounded-xl px-4 py-3 text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/70 transition-all'
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-brand-50 flex">
       {/* Left Brand Panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[480px] flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 border-r border-slate-800 p-12">
-        {/* Ambient orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-600/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-56 h-56 bg-emerald-600/10 rounded-full blur-3xl" />
+      <div className="hidden lg:flex flex-col justify-between w-[480px] flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-brand-100 via-brand-50 to-biscuit border-r border-biscuit p-12">
+        <img
+          src="/warm-ledger-illustration.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute right-5 bottom-24 w-56 h-56 rounded-[42%] border-0 bg-gradient-to-br from-brand-200/60 via-brand-300/40 to-sage-200/60 object-contain opacity-20 shadow-2xl shadow-brand-500/10 pointer-events-none"
+        />
 
         {/* Logo */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-emerald-400 p-[1.5px] shadow-xl shadow-indigo-500/20">
-              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-                <Boxes className="w-6 h-6 text-indigo-400" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-sage-400 p-[1.5px] shadow-xl shadow-brand-500/20">
+              <div className="w-full h-full bg-brand-50 rounded-[14px] flex items-center justify-center">
+                <Boxes className="w-6 h-6 text-brand-700" />
               </div>
             </div>
             <div>
-              <p className="font-heading text-2xl font-extrabold text-white">
-                Stock<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Sense</span>
+              <p className="font-heading text-2xl font-extrabold text-ink">
+                Stock<span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-sage-400">Sense</span>
               </p>
-              <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">Inventory Management System</p>
+              <p className="text-xs text-muted font-medium tracking-wider uppercase">Inventory Management System</p>
             </div>
           </div>
         </div>
 
         {/* Feature highlights */}
         <div className="relative z-10 space-y-5">
-          <h1 className="font-heading text-3xl font-extrabold text-white leading-tight">
+          <h1 className="font-heading text-3xl font-extrabold text-ink leading-tight">
             One governed pipeline.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-plum-400 to-sage-400">
               Every stock movement.
             </span>
           </h1>
-          <p className="text-slate-400 text-sm leading-relaxed">
+          <p className="text-muted text-sm leading-relaxed">
             Real-time visibility into what stock exists, where it is, and exactly how it moved — powered by an append-only ledger that can never be silently corrupted.
           </p>
 
@@ -161,12 +164,12 @@ export const LoginPage: React.FC = () => {
               { label: 'Automated Reorder Rules', desc: 'Draft receipts generated at threshold breach' },
             ].map((f) => (
               <div key={f.label} className="flex items-start gap-3">
-                <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center">
-                  <CheckCircle2 className="w-3 h-3 text-indigo-400" />
+                <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-brand-500/20 border border-brand-500/40 flex items-center justify-center">
+                  <CheckCircle2 className="w-3 h-3 text-brand-700" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-200">{f.label}</p>
-                  <p className="text-xs text-slate-500">{f.desc}</p>
+                  <p className="text-sm font-semibold text-ink">{f.label}</p>
+                  <p className="text-xs text-muted">{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -175,7 +178,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Bottom note */}
         <div className="relative z-10">
-          <p className="text-xs text-slate-600 font-mono">
+          <p className="text-xs text-muted font-mono">
             Phase 1 + Phase 2 — Backend 100% complete · All 8 tests passing
           </p>
         </div>
@@ -186,28 +189,28 @@ export const LoginPage: React.FC = () => {
         <div className="w-full max-w-[420px]">
           {/* Mobile Logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-400 p-[1px]">
-              <div className="w-full h-full bg-slate-950 rounded-xl flex items-center justify-center">
-                <Boxes className="w-4 h-4 text-indigo-400" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-sage-400 p-[1px]">
+              <div className="w-full h-full bg-brand-50 rounded-xl flex items-center justify-center">
+                <Boxes className="w-4 h-4 text-brand-700" />
               </div>
             </div>
-            <p className="font-heading font-extrabold text-white text-xl">
-              Stock<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Sense</span>
+            <p className="font-heading font-extrabold text-ink text-xl">
+              Stock<span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-sage-400">Sense</span>
             </p>
           </div>
 
           {/* Card */}
-          <div className="glass-panel rounded-2xl border border-slate-700/60 p-8 shadow-2xl">
+          <div className="glass-panel rounded-2xl border border-brand-200/60 p-8 shadow-2xl">
             {/* Header */}
             <div className="mb-7">
-              <h2 className="font-heading text-2xl font-extrabold text-white">
+              <h2 className="font-heading text-2xl font-extrabold text-ink">
                 {mode === 'login' && 'Welcome back'}
                 {mode === 'signup' && 'Create account'}
                 {mode === 'otp_request' && 'Reset password'}
                 {mode === 'otp_verify' && 'Verify your email'}
                 {mode === 'otp_new_password' && 'Choose a new password'}
               </h2>
-              <p className="text-sm text-slate-400 mt-1">
+              <p className="text-sm text-muted mt-1">
                 {mode === 'login' && 'Sign in to your StockSense account'}
                 {mode === 'signup' && 'Set up your inventory access'}
                 {mode === 'otp_request' && 'Enter your email to receive a one-time code'}
@@ -220,9 +223,9 @@ export const LoginPage: React.FC = () => {
             {error && (
               <div
                 role="alert"
-                className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-sm text-rose-300"
+                className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-clay-500/10 border border-clay-500/30 text-sm text-clay-700"
               >
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-400" />
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-clay-700" />
                 {error}
               </div>
             )}
@@ -230,9 +233,9 @@ export const LoginPage: React.FC = () => {
               <div
                 role="status"
                 aria-live="polite"
-                className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-300"
+                className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-sage-500/10 border border-sage-500/30 text-sm text-sage-700"
               >
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5 text-sage-700" />
                 {success}
               </div>
             )}
@@ -242,10 +245,10 @@ export const LoginPage: React.FC = () => {
               <div
                 role="status"
                 aria-live="polite"
-                className="mb-5 p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs font-mono text-indigo-300"
+                className="mb-5 p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/30 text-xs font-mono text-brand-700"
               >
-                🔑 Dev OTP Code: <strong className="text-indigo-200 text-sm tracking-widest">{otpDebug}</strong>
-                <p className="mt-1 text-slate-500 font-sans">(Auto-filled below for convenience)</p>
+                🔑 Dev OTP Code: <strong className="text-brand-700 text-sm tracking-widest">{otpDebug}</strong>
+                <p className="mt-1 text-muted font-sans">(Auto-filled below for convenience)</p>
               </div>
             )}
 
@@ -253,11 +256,11 @@ export const LoginPage: React.FC = () => {
             {mode === 'login' && (
               <form onSubmit={handleLogin} noValidate className="space-y-4">
                 <div>
-                  <label htmlFor="login-email" className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label htmlFor="login-email" className="block text-xs font-semibold text-ink mb-1.5">
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="login-email"
                       type="email"
@@ -272,11 +275,11 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label htmlFor="login-password" className="block text-xs font-semibold text-ink mb-1.5">
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="login-password"
                       type={showPassword ? 'text' : 'password'}
@@ -290,7 +293,7 @@ export const LoginPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -302,7 +305,7 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => { setMode('otp_request'); clearState() }}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                    className="text-xs text-brand-700 hover:text-brand-700 font-medium transition-colors"
                   >
                     Forgot password?
                   </button>
@@ -311,7 +314,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-ink shadow-lg shadow-brand-500/25 transition-all disabled:opacity-60"
                 >
                   {loading
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Signing in…</>
@@ -320,25 +323,25 @@ export const LoginPage: React.FC = () => {
                 </button>
 
                 {/* Demo credentials */}
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1.5">
-                  <p className="text-slate-400 font-semibold text-[11px] uppercase tracking-wide">Demo Credentials</p>
+                <div className="p-3.5 rounded-xl bg-surface/60 border border-biscuit text-xs space-y-1.5">
+                  <p className="text-muted font-semibold text-[11px] uppercase tracking-wide">Demo Credentials</p>
                   <button
                     type="button"
                     onClick={() => { setEmail('manager@stocksense.com'); setPassword('Manager@12345') }}
-                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-indigo-300 transition-colors"
+                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-biscuit text-brand-700 transition-colors"
                   >
-                    <Shield className="w-3 h-3 text-indigo-400" />
+                    <Shield className="w-3 h-3 text-brand-700" />
                     Inventory Manager
-                    <span className="ml-auto text-slate-500 font-mono text-[10px]">Manager@12345</span>
+                    <span className="ml-auto text-muted font-mono text-[10px]">Manager@12345</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => { setEmail('staff@stocksense.com'); setPassword('Staff@12345') }}
-                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-emerald-300 transition-colors"
+                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-biscuit text-sage-700 transition-colors"
                   >
-                    <User className="w-3 h-3 text-emerald-400" />
+                    <User className="w-3 h-3 text-sage-700" />
                     Warehouse Staff
-                    <span className="ml-auto text-slate-500 font-mono text-[10px]">Staff@12345</span>
+                    <span className="ml-auto text-muted font-mono text-[10px]">Staff@12345</span>
                   </button>
                 </div>
               </form>
@@ -348,9 +351,9 @@ export const LoginPage: React.FC = () => {
             {mode === 'signup' && (
               <form onSubmit={handleSignup} noValidate className="space-y-4">
                 <div>
-                  <label htmlFor="signup-name" className="block text-xs font-semibold text-slate-300 mb-1.5">Full Name</label>
+                  <label htmlFor="signup-name" className="block text-xs font-semibold text-ink mb-1.5">Full Name</label>
                   <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="signup-name"
                       value={name}
@@ -364,9 +367,9 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="signup-email" className="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
+                  <label htmlFor="signup-email" className="block text-xs font-semibold text-ink mb-1.5">Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="signup-email"
                       type="email"
@@ -380,12 +383,12 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-400">New accounts start with warehouse staff access. Contact your system administrator to request manager access.</p>
+                <p className="text-xs text-muted">New accounts start with warehouse staff access. Contact your system administrator to request manager access.</p>
 
                 <div>
-                  <label htmlFor="signup-password" className="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
+                  <label htmlFor="signup-password" className="block text-xs font-semibold text-ink mb-1.5">Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="signup-password"
                       type={showPassword ? 'text' : 'password'}
@@ -399,7 +402,7 @@ export const LoginPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
                       aria-label="Toggle password visibility"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -408,9 +411,9 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="signup-confirm" className="block text-xs font-semibold text-slate-300 mb-1.5">Confirm Password</label>
+                  <label htmlFor="signup-confirm" className="block text-xs font-semibold text-ink mb-1.5">Confirm Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="signup-confirm"
                       type={showPassword ? 'text' : 'password'}
@@ -427,7 +430,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-ink shadow-lg shadow-brand-500/25 transition-all disabled:opacity-60"
                 >
                   {loading
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Creating account…</>
@@ -441,9 +444,9 @@ export const LoginPage: React.FC = () => {
             {mode === 'otp_request' && (
               <form onSubmit={handleRequestOTP} noValidate className="space-y-4">
                 <div>
-                  <label htmlFor="otp-email" className="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
+                  <label htmlFor="otp-email" className="block text-xs font-semibold text-ink mb-1.5">Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="otp-email"
                       type="email"
@@ -459,7 +462,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-ink shadow-lg shadow-brand-500/25 transition-all disabled:opacity-60"
                 >
                   {loading
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Sending OTP…</>
@@ -473,7 +476,7 @@ export const LoginPage: React.FC = () => {
             {mode === 'otp_verify' && (
               <form onSubmit={handleContinueOTP} noValidate className="space-y-4">
                 <div>
-                  <label htmlFor="otp-code" className="block text-xs font-semibold text-slate-300 mb-1.5">6-Digit OTP Code</label>
+                  <label htmlFor="otp-code" className="block text-xs font-semibold text-ink mb-1.5">6-Digit OTP Code</label>
                   <input
                     id="otp-code"
                     type="text"
@@ -491,7 +494,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={otpCode.length !== 6}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-ink shadow-lg shadow-brand-500/25 transition-all disabled:opacity-60"
                 >
                   <ArrowRight className="w-4 h-4" /> Continue
                 </button>
@@ -501,9 +504,9 @@ export const LoginPage: React.FC = () => {
             {mode === 'otp_new_password' && (
               <form onSubmit={handleResetPassword} noValidate className="space-y-4">
                 <div>
-                  <label htmlFor="reset-password" className="block text-xs font-semibold text-slate-300 mb-1.5">New Password</label>
+                  <label htmlFor="reset-password" className="block text-xs font-semibold text-ink mb-1.5">New Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="reset-password"
                       type={showPassword ? 'text' : 'password'}
@@ -517,7 +520,7 @@ export const LoginPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
                       aria-label="Toggle password visibility"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -525,9 +528,9 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="reset-confirm" className="block text-xs font-semibold text-slate-300 mb-1.5">Confirm New Password</label>
+                  <label htmlFor="reset-confirm" className="block text-xs font-semibold text-ink mb-1.5">Confirm New Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                     <input
                       id="reset-confirm"
                       type={showPassword ? 'text' : 'password'}
@@ -543,7 +546,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-500/25 transition-all disabled:opacity-60"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-sage-600 to-sage-500 hover:from-sage-500 hover:to-sage-400 text-ink shadow-lg shadow-sage-500/25 transition-all disabled:opacity-60"
                 >
                   {loading
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Resetting…</>
@@ -554,13 +557,13 @@ export const LoginPage: React.FC = () => {
             )}
 
             {/* Mode Toggle Footer */}
-            <div className="mt-6 pt-5 border-t border-slate-800 text-center">
+            <div className="mt-6 pt-5 border-t border-biscuit text-center">
               {mode === 'login' && (
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-muted">
                   No account?{' '}
                   <button
                     onClick={() => { setMode('signup'); clearState() }}
-                    className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                    className="text-brand-700 hover:text-brand-700 font-semibold transition-colors"
                   >
                     Sign up
                   </button>
@@ -569,7 +572,7 @@ export const LoginPage: React.FC = () => {
               {mode !== 'login' && (
                 <button
                   onClick={() => { setMode('login'); clearState(); setOtpDebug(null); setOtpCode('') }}
-                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1.5 mx-auto"
+                  className="text-sm text-muted hover:text-ink transition-colors flex items-center gap-1.5 mx-auto"
                 >
                   ← Back to Sign In
                 </button>
