@@ -1,0 +1,32 @@
+# Python runtime and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+venv/
+.venv/
+**/venv/
+**/.venv/
+
+# Local databases and secrets
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies and build output
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+
+# Local-only project notes
+/stocksensprogress
+/README.local.md
+
+# Operating system files
+.DS_Store
+Thumbs.db

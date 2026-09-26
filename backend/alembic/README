@@ -1,0 +1,17 @@
+# StockSense Database Migrations
+
+Alembic uses the async SQLAlchemy URL from `DATABASE_URL` in the backend settings. Keep credentials in `backend/.env`, never in migration files.
+
+From the `backend` directory, apply migrations with:
+
+```powershell
+venv\Scripts\alembic.exe upgrade head
+```
+
+Generate a migration after changing SQLAlchemy models with:
+
+```powershell
+venv\Scripts\alembic.exe revision --autogenerate -m "describe the schema change"
+```
+
+Review generated migration code before applying it. Production startup does not create tables automatically; apply migrations before starting the application.
