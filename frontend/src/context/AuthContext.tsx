@@ -6,7 +6,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  signup: (name: string, email: string, password: string) => Promise<User>;
+  signup: (name: string, email: string, password: string, inviteCode?: string) => Promise<{ message: string; otp_debug?: string }>;
+  verifySignup: (email: string, otp_code: string) => Promise<User>;
   logout: () => Promise<void>;
   requestOTP: (email: string) => Promise<{ message: string; otp_debug?: string }>;
   resetPassword: (email: string, otp_code: string, new_password: string) => Promise<void>;
@@ -50,11 +51,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (
     name: string,
     email: string,
-    password: string
-  ): Promise<User> => {
-    await api.post<User>('/auth/signup', { name, email, password, role: 'WAREHOUSE_STAFF' });
-    // Automatically log in after signup
-    return await login(email, password);
+    password: string,
+    inviteCode?: string
+  ): Promise<{ message: string; otp_debug?: string }> => {
+    return await api.post('/auth/signup', { name, email, password, invite_code: inviteCode || undefined });
+  };
+
+  const verifySignup = async (email: string, otp_code: string): Promise<User> => {
+    const data = await api.post('/auth/verify-signup', { email, otp_code });
+    if (data.access_token) localStorage.setItem('stocksense_token', data.access_token);
+    setUser(data.user);
+    return data.user;
   };
 
   const logout = async () => {
@@ -85,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         login,
         signup,
+        verifySignup,
         logout,
         requestOTP,
         resetPassword,

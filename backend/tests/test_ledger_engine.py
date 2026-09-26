@@ -20,6 +20,7 @@ async def test_ledger_receipt_and_transfer(test_db, seed_data):
 
     # Create dummy operation
     op = StockOperation(
+        owner_id=manager.id,
         reference="WH1/IN/TEST-01",
         operation_type="RECEIPT",
         source_location_id=loc_vendor.id,
@@ -50,6 +51,7 @@ async def test_ledger_receipt_and_transfer(test_db, seed_data):
 
     # 2. Transfer 20 units (Stock -> Rack A)
     op_trans = StockOperation(
+        owner_id=manager.id,
         reference="WH1/INT/TEST-01",
         operation_type="INTERNAL",
         source_location_id=loc_stock.id,
@@ -88,12 +90,13 @@ async def test_ledger_insufficient_stock_and_override(test_db, seed_data):
     loc_customer = seed_data["loc_customer"]
 
     op = StockOperation(
+        owner_id=manager.id,
         reference="WH1/OUT/TEST-01",
         operation_type="DELIVERY",
         source_location_id=loc_stock.id,
         destination_location_id=loc_customer.id,
         status="DRAFT",
-        created_by=staff.id
+        created_by=manager.id
     )
     test_db.add(op)
     await test_db.flush()
@@ -107,7 +110,7 @@ async def test_ledger_insufficient_stock_and_override(test_db, seed_data):
             to_location_id=loc_customer.id,
             quantity=Decimal("15.00"),
             operation_id=op.id,
-            user_id=staff.id,
+            user_id=manager.id,
             allow_negative_stock=False,
             is_manager=False
         )
@@ -121,7 +124,7 @@ async def test_ledger_insufficient_stock_and_override(test_db, seed_data):
             to_location_id=loc_customer.id,
             quantity=Decimal("15.00"),
             operation_id=op.id,
-            user_id=staff.id,
+            user_id=manager.id,
             allow_negative_stock=True,
             is_manager=False
         )
@@ -152,6 +155,7 @@ async def test_rebuild_quants_from_ledger(test_db, seed_data):
     loc_stock = seed_data["loc_stock"]
 
     op = StockOperation(
+        owner_id=manager.id,
         reference="WH1/IN/REBUILD-01",
         operation_type="RECEIPT",
         source_location_id=loc_vendor.id,

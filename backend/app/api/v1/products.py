@@ -28,7 +28,7 @@ async def list_categories(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    res = await db.execute(select(ProductCategory).order_by(ProductCategory.name.asc()))
+    res = await db.execute(select(ProductCategory).where(ProductCategory.owner_id == current_user.inventory_owner_id).order_by(ProductCategory.name.asc()))
     return res.scalars().all()
 
 @router.post("/categories", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
@@ -38,7 +38,7 @@ async def create_category(
     current_user = Depends(require_role(["INVENTORY_MANAGER"]))
 ):
     existing = await db.execute(
-        select(ProductCategory).where(ProductCategory.name == cat_in.name.strip())
+        select(ProductCategory).where(ProductCategory.owner_id == current_user.inventory_owner_id, ProductCategory.name == cat_in.name.strip())
     )
     if existing.scalar_one_or_none():
         raise HTTPException(
@@ -46,7 +46,7 @@ async def create_category(
             detail=f"Category '{cat_in.name}' already exists."
         )
 
-    cat = ProductCategory(name=cat_in.name.strip())
+    cat = ProductCategory(owner_id=current_user.inventory_owner_id, name=cat_in.name.strip())
     db.add(cat)
     await db.commit()
     await db.refresh(cat)
@@ -62,6 +62,7 @@ async def _build_product_response(product: Product, db: AsyncSession) -> Product
         .join(Warehouse, Location.warehouse_id == Warehouse.id)
         .where(
             StockQuant.product_id == product.id,
+            Warehouse.owner_id == product.owner_id,
             Location.type == "INTERNAL"
         )
     )
@@ -111,7 +112,7 @@ async def list_products(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    query = select(Product).options(selectinload(Product.category))
+    query = select(Product).options(selectinload(Product.category)).where(Product.owner_id == current_user.inventory_owner_id)
     if category_id:
         query = query.where(Product.category_id == category_id)
     if search:
@@ -136,7 +137,7 @@ async def create_product(
     current_user = Depends(require_role(["INVENTORY_MANAGER"]))
 ):
     existing = await db.execute(
-        select(Product).where(Product.sku == prod_in.sku.upper().strip())
+        select(Product).where(Product.owner_id == current_user.inventory_owner_id, Product.sku == prod_in.sku.upper().strip())
     )
     if existing.scalar_one_or_none():
         raise HTTPException(
@@ -145,7 +146,7 @@ async def create_product(
         )
 
     if prod_in.category_id:
-        cat = await db.get(ProductCategory, prod_in.category_id)
+        cat = await db.scalar(select(ProductCategory).where(ProductCategory.id == prod_in.category_id, ProductCategory.owner_id == current_user.inventory_owner_id))
         if not cat:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -153,6 +154,7 @@ async def create_product(
             )
 
     product = Product(
+        owner_id=current_user.inventory_owner_id,
         sku=prod_in.sku.upper().strip(),
         name=prod_in.name.strip(),
         category_id=prod_in.category_id,
@@ -165,7 +167,7 @@ async def create_product(
     await db.refresh(product)
 
     res = await db.execute(
-        select(Product).options(selectinload(Product.category)).where(Product.id == product.id)
+        select(Product).options(selectinload(Product.category)).where(Product.id == product.id, Product.owner_id == current_user.inventory_owner_id)
     )
     prod = res.scalar_one()
     return await _build_product_response(prod, db)
@@ -177,7 +179,7 @@ async def get_product(
     current_user = Depends(get_current_user)
 ):
     res = await db.execute(
-        select(Product).options(selectinload(Product.category)).where(Product.id == product_id)
+        select(Product).options(selectinload(Product.category)).where(Product.id == product_id, Product.owner_id == current_user.inventory_owner_id)
     )
     product = res.scalar_one_or_none()
     if not product:
@@ -194,7 +196,7 @@ async def update_product(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_role(["INVENTORY_MANAGER"]))
 ):
-    product = await db.get(Product, product_id)
+    product = await db.scalar(select(Product).where(Product.id == product_id, Product.owner_id == current_user.inventory_owner_id))
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -204,7 +206,13 @@ async def update_product(
     if prod_update.name is not None:
         product.name = prod_update.name.strip()
     if prod_update.category_id is not None:
-        product.category_id = prod_update.category_id
+        category = await db.scalar(select(ProductCategory).where(
+            ProductCategory.id == prod_update.category_id,
+            ProductCategory.owner_id == current_user.inventory_owner_id
+        ))
+        if category is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Category not found in this workspace.")
+        product.category_id = category.id
     if prod_update.uom is not None:
         product.uom = prod_update.uom.strip()
     if prod_update.min_stock_level is not None:
@@ -216,7 +224,7 @@ async def update_product(
     await db.refresh(product)
 
     res = await db.execute(
-        select(Product).options(selectinload(Product.category)).where(Product.id == product_id)
+        select(Product).options(selectinload(Product.category)).where(Product.id == product_id, Product.owner_id == current_user.inventory_owner_id)
     )
     prod = res.scalar_one()
     return await _build_product_response(prod, db)
@@ -233,7 +241,7 @@ async def check_reorder_rules(
     Checks all products where on_hand < min_stock_level.
     If auto_create_drafts is True (and user is manager), creates draft Receipts.
     """
-    products = (await db.execute(select(Product))).scalars().all()
+    products = (await db.execute(select(Product).where(Product.owner_id == current_user.inventory_owner_id))).scalars().all()
     alerts = []
     created_receipts = []
 
@@ -242,7 +250,8 @@ async def check_reorder_rules(
         q_res = await db.execute(
             select(func.coalesce(func.sum(StockQuant.on_hand), Decimal("0.00")))
             .join(Location, StockQuant.location_id == Location.id)
-            .where(StockQuant.product_id == p.id, Location.type == "INTERNAL")
+            .join(Warehouse, Location.warehouse_id == Warehouse.id)
+            .where(StockQuant.product_id == p.id, Location.type == "INTERNAL", Warehouse.owner_id == current_user.inventory_owner_id)
         )
         total_on_hand = q_res.scalar_one()
 
@@ -264,7 +273,7 @@ async def check_reorder_rules(
 
             if auto_create_drafts and current_user.role == "INVENTORY_MANAGER":
                 # Find default warehouse and internal stock location
-                wh_res = await db.execute(select(Warehouse).limit(1))
+                wh_res = await db.execute(select(Warehouse).where(Warehouse.owner_id == current_user.inventory_owner_id).limit(1))
                 wh = wh_res.scalar_one_or_none()
                 if wh:
                     dest_loc_res = await db.execute(
@@ -279,6 +288,7 @@ async def check_reorder_rules(
                     if dest_loc and vendor_loc:
                         ref = f"{wh.code}/IN/REORDER-{p.sku}-{uuid.uuid4().hex[:6].upper()}"
                         op = StockOperation(
+                            owner_id=current_user.inventory_owner_id,
                             reference=ref,
                             operation_type="RECEIPT",
                             source_location_id=vendor_loc.id,

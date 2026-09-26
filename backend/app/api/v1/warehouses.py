@@ -21,7 +21,7 @@ async def list_warehouses(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    stmt = select(Warehouse).options(selectinload(Warehouse.locations)).order_by(Warehouse.code.asc())
+    stmt = select(Warehouse).options(selectinload(Warehouse.locations)).where(Warehouse.owner_id == current_user.inventory_owner_id).order_by(Warehouse.code.asc())
     res = await db.execute(stmt)
     return res.scalars().all()
 
@@ -31,7 +31,7 @@ async def create_warehouse(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_role(["INVENTORY_MANAGER"]))
 ):
-    existing = await db.execute(select(Warehouse).where(Warehouse.code == wh_in.code.upper()))
+    existing = await db.execute(select(Warehouse).where(Warehouse.owner_id == current_user.inventory_owner_id, Warehouse.code == wh_in.code.upper().strip()))
     if existing.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -39,6 +39,7 @@ async def create_warehouse(
         )
 
     wh = Warehouse(
+        owner_id=current_user.inventory_owner_id,
         code=wh_in.code.upper().strip(),
         name=wh_in.name.strip(),
         address=wh_in.address.strip() if wh_in.address else None
@@ -84,7 +85,7 @@ async def list_locations(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    query = select(Location)
+    query = select(Location).join(Warehouse, Location.warehouse_id == Warehouse.id).where(Warehouse.owner_id == current_user.inventory_owner_id)
     if warehouse_id:
         query = query.where(Location.warehouse_id == warehouse_id)
     if location_type:
@@ -98,7 +99,7 @@ async def create_location(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(require_role(["INVENTORY_MANAGER"]))
 ):
-    wh = await db.get(Warehouse, loc_in.warehouse_id)
+    wh = await db.scalar(select(Warehouse).where(Warehouse.id == loc_in.warehouse_id, Warehouse.owner_id == current_user.inventory_owner_id))
     if not wh:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

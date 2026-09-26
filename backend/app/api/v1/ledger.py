@@ -40,6 +40,7 @@ async def get_move_history(
         )
     )
 
+    query = query.join(StockOperation, StockLedger.operation_id == StockOperation.id).where(StockOperation.owner_id == current_user.inventory_owner_id)
     if product_id:
         query = query.where(StockLedger.product_id == product_id)
     if operation_id:
@@ -52,9 +53,7 @@ async def get_move_history(
             )
         )
     if operation_type:
-        query = query.join(StockOperation, StockLedger.operation_id == StockOperation.id).where(
-            StockOperation.operation_type == operation_type.upper()
-        )
+        query = query.where(StockOperation.operation_type == operation_type.upper())
     if search:
         search_filter = f"%{search.strip()}%"
         query = query.join(Product, StockLedger.product_id == Product.id).where(
@@ -114,7 +113,7 @@ async def get_current_stock_quants(
         .join(Product, StockQuant.product_id == Product.id)
         .join(Location, StockQuant.location_id == Location.id)
         .join(Warehouse, Location.warehouse_id == Warehouse.id)
-        .where(Location.type == "INTERNAL")
+        .where(Location.type == "INTERNAL", Product.owner_id == current_user.inventory_owner_id, Warehouse.owner_id == current_user.inventory_owner_id)
     )
     if product_id:
         stmt = stmt.where(StockQuant.product_id == product_id)
@@ -150,5 +149,5 @@ async def rebuild_ledger_quants(
     """
     Manager endpoint to rebuild stock_quant materialized view directly from the append-only ledger history.
     """
-    result = await LedgerEngine.rebuild_quants_from_ledger(db, product_id)
+    result = await LedgerEngine.rebuild_quants_from_ledger(db, product_id, current_user.inventory_owner_id)
     return result

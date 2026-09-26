@@ -1,13 +1,15 @@
 import uuid
-from sqlalchemy import String, CheckConstraint, ForeignKey, Uuid
+from sqlalchemy import String, CheckConstraint, ForeignKey, Uuid, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 class Warehouse(Base):
     __tablename__ = "warehouses"
+    __table_args__ = (UniqueConstraint("owner_id", "code", name="uq_warehouse_owner_code"),)
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    code: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
+    code: Mapped[str] = mapped_column(String, index=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     address: Mapped[str | None] = mapped_column(String, nullable=True)
 

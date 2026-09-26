@@ -1,13 +1,19 @@
 import os
+from pathlib import Path
 from typing import List, Literal
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="allow")
+    model_config = SettingsConfigDict(
+        env_file=(Path(__file__).resolve().parents[2] / ".env", Path(__file__).resolve().parents[3] / ".env"),
+        extra="allow",
+    )
 
     APP_ENV: Literal["development", "test", "production"] = "development"
     PROJECT_NAME: str = "StockSense Inventory Management System"
+    GROQ_API_KEY: str | None = None
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
     API_V1_STR: str = "/api/v1"
 
     # Secret Key for JWT
@@ -45,6 +51,16 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str | None = None
     SMTP_FROM_EMAIL: str | None = None
     SMTP_STARTTLS: bool = True
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_postgres_url(cls, value):
+        if isinstance(value, str):
+            if value.startswith("postgres://"):
+                return "postgresql+asyncpg://" + value.removeprefix("postgres://")
+            if value.startswith("postgresql://"):
+                return "postgresql+asyncpg://" + value.removeprefix("postgresql://")
+        return value
 
     @property
     def smtp_configured(self) -> bool:

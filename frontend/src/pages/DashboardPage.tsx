@@ -12,6 +12,7 @@ import {
   Clock
 } from 'lucide-react';
 import { KPICard } from '../components/dashboard/KPICard';
+import { StockSenseAssistant } from '../components/dashboard/StockSenseAssistant';
 import { api } from '../lib/api';
 import { useCategories, useKPIs, useWarehouses } from '../lib/queries';
 import { useAuth } from '../context/AuthContext';
@@ -118,6 +119,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </button>
         </div>
       </div>
+
+      <StockSenseAssistant isManager={isManager} />
 
       {/* Reorder Notification Banner (if any) */}
       {reorderStatusMsg && (

@@ -6,8 +6,9 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, func
 from app.models.stock import StockQuant, StockLedger, StockOperation, StockOperationLine
-from app.models.warehouse import Location
+from app.models.warehouse import Location, Warehouse
 from app.models.product import Product
+from app.models.user import User
 from app.api.v1.websocket import ws_manager
 from app.ledger.exceptions import (
     InsufficientStockException,
@@ -61,6 +62,7 @@ class LedgerEngine:
         quantity: Decimal,
         operation_id: uuid.UUID,
         user_id: uuid.UUID,
+        workspace_owner_id: Optional[uuid.UUID] = None,
         allow_negative_stock: bool = False,
         is_manager: bool = False,
         commit: bool = True
@@ -85,18 +87,27 @@ class LedgerEngine:
 
         locks = await _acquire_locks(product_id, from_location_id, to_location_id)
         try:
+            # Every movement must remain inside the authenticated user's workspace.
+            if workspace_owner_id is None:
+                actor = await db.get(User, user_id)
+                workspace_owner_id = actor.inventory_owner_id if actor else user_id
+            product = await db.scalar(select(Product).where(Product.id == product_id, Product.owner_id == workspace_owner_id))
+            operation = await db.scalar(select(StockOperation).where(StockOperation.id == operation_id, StockOperation.owner_id == workspace_owner_id))
+            if product is None or operation is None:
+                raise InvalidMovementException("Product or operation was not found in this workspace.")
+
             # 2. Check Locations
             from_loc = None
             to_loc = None
             if from_location_id:
                 from_loc = await db.get(Location, from_location_id)
-                if not from_loc:
-                    raise InvalidMovementException(f"Source location {from_location_id} not found.")
+                if not from_loc or await db.scalar(select(Location.id).join(Warehouse).where(Location.id == from_location_id, Warehouse.owner_id == workspace_owner_id)) is None:
+                    raise InvalidMovementException(f"Source location {from_location_id} not found in this workspace.")
 
             if to_location_id:
                 to_loc = await db.get(Location, to_location_id)
-                if not to_loc:
-                    raise InvalidMovementException(f"Destination location {to_location_id} not found.")
+                if not to_loc or await db.scalar(select(Location.id).join(Warehouse).where(Location.id == to_location_id, Warehouse.owner_id == workspace_owner_id)) is None:
+                    raise InvalidMovementException(f"Destination location {to_location_id} not found in this workspace.")
 
             # 3. Handle Deducting from Source (if INTERNAL location)
             if from_loc and from_loc.type == "INTERNAL":
@@ -197,6 +208,7 @@ class LedgerEngine:
         operation = await db.get(StockOperation, ledger_entry.operation_id)
         await ws_manager.broadcast({
             "type": "STOCK_MOVEMENT",
+            "owner_id": str(operation.owner_id) if operation and operation.owner_id else None,
             "operation_type": operation.operation_type if operation else None,
             "operation_id": str(ledger_entry.operation_id),
             "product_id": str(ledger_entry.product_id),
@@ -209,7 +221,8 @@ class LedgerEngine:
     @staticmethod
     async def rebuild_quants_from_ledger(
         db: AsyncSession,
-        product_id: Optional[uuid.UUID] = None
+        product_id: Optional[uuid.UUID] = None,
+        owner_id: Optional[uuid.UUID] = None
     ) -> Dict[str, Any]:
         """
         Recomputes all stock_quant rows from the append-only stock_ledger.
@@ -217,7 +230,9 @@ class LedgerEngine:
         """
         async with _global_lock:
             # Get internal locations
-            loc_stmt = select(Location.id).where(Location.type == "INTERNAL")
+            loc_stmt = select(Location.id).join(Warehouse).where(Location.type == "INTERNAL")
+            if owner_id:
+                loc_stmt = loc_stmt.where(Warehouse.owner_id == owner_id)
             loc_res = await db.execute(loc_stmt)
             internal_loc_ids = set(loc_res.scalars().all())
 
@@ -225,6 +240,8 @@ class LedgerEngine:
             query = select(StockLedger)
             if product_id:
                 query = query.where(StockLedger.product_id == product_id)
+            if owner_id:
+                query = query.join(StockOperation, StockLedger.operation_id == StockOperation.id).where(StockOperation.owner_id == owner_id)
 
             res = await db.execute(query.order_by(StockLedger.timestamp.asc()))
             ledger_entries = res.scalars().all()

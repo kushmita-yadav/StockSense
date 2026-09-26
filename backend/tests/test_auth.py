@@ -12,29 +12,25 @@ async def test_signup_and_login(client: AsyncClient, test_db):
         "password": "Password123!",
         "role": "INVENTORY_MANAGER"
     }
-    manager_signup_resp = await client.post("/api/v1/auth/signup", json=signup_payload)
-    assert manager_signup_resp.status_code == 403
-
-    signup_payload["role"] = "WAREHOUSE_STAFF"
     signup_resp = await client.post("/api/v1/auth/signup", json=signup_payload)
     assert signup_resp.status_code == 201
-    user_data = signup_resp.json()
-    assert user_data["email"] == "jane@example.com"
-    assert user_data["role"] == "WAREHOUSE_STAFF"
+    signup_data = signup_resp.json()
+    assert "otp_debug" in signup_data
 
     # 2. Duplicate signup fails
     dup_resp = await client.post("/api/v1/auth/signup", json=signup_payload)
     assert dup_resp.status_code == 400
 
-    # 3. Login
-    login_resp = await client.post("/api/v1/auth/login", json={
+    # 3. Verify email and log in
+    verify_resp = await client.post("/api/v1/auth/verify-signup", json={
         "email": "jane@example.com",
-        "password": "Password123!"
+        "otp_code": signup_data["otp_debug"],
     })
-    assert login_resp.status_code == 200
-    token_data = login_resp.json()
+    assert verify_resp.status_code == 200
+    token_data = verify_resp.json()
     assert "access_token" in token_data
     assert token_data["user"]["email"] == "jane@example.com"
+    assert token_data["user"]["role"] == "INVENTORY_MANAGER"
 
     # 4. Access /me endpoint
     token = token_data["access_token"]
@@ -79,8 +75,8 @@ async def test_otp_is_sent_without_debug_code_outside_development(
 ):
     sent_email = {}
 
-    async def capture_email(recipient: str, code: str):
-        sent_email.update(recipient=recipient, code=code)
+    async def capture_email(recipient: str, code: str, purpose: str):
+        sent_email.update(recipient=recipient, code=code, purpose=purpose)
 
     monkeypatch.setattr(settings, "APP_ENV", "production")
     monkeypatch.setattr(settings, "SMTP_HOST", "smtp.example.test")
@@ -105,7 +101,7 @@ def test_hardened_production_settings_are_accepted():
         _env_file=None,
         APP_ENV="production",
         SECRET_KEY="s" * 48,
-        DATABASE_URL="postgresql+asyncpg://user:pass@db.example.test/stocksense",
+        DATABASE_URL="postgresql://user:pass@db.example.test/stocksense",
         COOKIE_SECURE=True,
         CORS_ORIGINS=["https://stocksense.example.test"],
         SMTP_HOST="smtp.example.test",
@@ -113,6 +109,7 @@ def test_hardened_production_settings_are_accepted():
     )
 
     assert production_settings.smtp_configured
+    assert production_settings.DATABASE_URL.startswith("postgresql+asyncpg://")
 
 @pytest.mark.asyncio
 async def test_rbac_guard(client: AsyncClient, seed_data, staff_token, manager_token):

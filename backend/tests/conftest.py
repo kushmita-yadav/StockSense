@@ -79,7 +79,7 @@ async def seed_data(test_db: AsyncSession):
     await test_db.flush()
 
     # Warehouse & Locations
-    wh = Warehouse(code="WH1", name="Primary Distribution Hub", address="Sector 7")
+    wh = Warehouse(owner_id=manager.id, code="WH1", name="Primary Distribution Hub", address="Sector 7")
     test_db.add(wh)
     await test_db.flush()
 
@@ -92,11 +92,12 @@ async def seed_data(test_db: AsyncSession):
     await test_db.flush()
 
     # Category & Product
-    cat = ProductCategory(name="Metals")
+    cat = ProductCategory(owner_id=manager.id, name="Metals")
     test_db.add(cat)
     await test_db.flush()
 
     prod = Product(
+        owner_id=manager.id,
         sku="STEEL-ROD-01",
         name="Steel Rods",
         category_id=cat.id,

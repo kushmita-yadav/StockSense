@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { getWebSocketUrl } from '../../lib/api';
 
 interface NavbarProps {
   currentTab: string;
@@ -41,8 +42,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     const connect = () => {
       if (disposed) return;
       try {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        socket = new WebSocket(`${protocol}//${window.location.host}/api/v1/ws/alerts`);
+        socket = new WebSocket(getWebSocketUrl('/ws/alerts'));
         socket.onopen = () => setWsConnected(true);
         socket.onclose = () => {
           setWsConnected(false);

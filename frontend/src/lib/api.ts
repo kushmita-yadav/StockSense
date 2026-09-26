@@ -1,4 +1,13 @@
-const API_BASE = '/api/v1';
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL?.trim();
+export const API_BASE = (configuredApiBase || '/api/v1').replace(/\/+$/, '');
+
+export function getWebSocketUrl(path: string): string {
+  const apiUrl = new URL(API_BASE, window.location.origin);
+  const protocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+  const basePath = apiUrl.pathname.replace(/\/+$/, '');
+  const endpoint = path.startsWith('/') ? path : `/${path}`;
+  return `${protocol}//${apiUrl.host}${basePath}${endpoint}`;
+}
 
 export class ApiError extends Error {
   status: number;

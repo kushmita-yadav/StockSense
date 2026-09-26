@@ -7,7 +7,8 @@ class SignupRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
     password: str = Field(..., min_length=8)
-    role: Literal["INVENTORY_MANAGER", "WAREHOUSE_STAFF"]
+    role: Literal["INVENTORY_MANAGER", "WAREHOUSE_STAFF"] | None = None
+    invite_code: str | None = Field(default=None, max_length=160)
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -19,7 +20,7 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     name: str
     email: str
-    role: Literal["INVENTORY_MANAGER", "WAREHOUSE_STAFF"]
+    role: Literal["INVENTORY_MANAGER", "WAREHOUSE_STAFF"] | None = None
     is_active: bool
     created_at: datetime
 
@@ -30,6 +31,10 @@ class TokenResponse(BaseModel):
 
 class OTPRequest(BaseModel):
     email: EmailStr
+
+class SignupOTPVerification(BaseModel):
+    email: EmailStr
+    otp_code: str = Field(..., min_length=6, max_length=6)
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr

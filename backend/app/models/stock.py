@@ -37,10 +37,12 @@ class StockOperation(Base):
             name="check_operation_status"
         ),
         Index("idx_operations_ref_status", "reference", "status"),
+        UniqueConstraint("owner_id", "reference", name="uq_operation_owner_reference"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    reference: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
+    reference: Mapped[str] = mapped_column(String, index=True, nullable=False)
     operation_type: Mapped[str] = mapped_column(String, nullable=False)
     source_location_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("locations.id", ondelete="SET NULL"), nullable=True
@@ -61,7 +63,7 @@ class StockOperation(Base):
         nullable=False
     )
 
-    creator = relationship("User", back_populates="operations_created")
+    creator = relationship("User", back_populates="operations_created", foreign_keys=[created_by])
     source_location = relationship("Location", foreign_keys=[source_location_id])
     destination_location = relationship("Location", foreign_keys=[destination_location_id])
     lines = relationship("StockOperationLine", back_populates="operation", cascade="all, delete-orphan")

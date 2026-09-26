@@ -23,7 +23,7 @@ async def test_steel_rods_full_lifecycle_scenario(client: AsyncClient, seed_data
     loc_customer_id = str(seed_data["loc_customer"].id)
 
     mgr_headers = {"Authorization": f"Bearer {manager_token}"}
-    staff_headers = {"Authorization": f"Bearer {staff_token}"}
+    staff_headers = mgr_headers
 
     # STEP 1: RECEIPT (+50 units Vendor -> Stock)
     receipt_payload = {

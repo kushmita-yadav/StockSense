@@ -23,7 +23,7 @@ async def get_dashboard_kpis(
     current_user = Depends(get_current_user)
 ):
     # 1. Base Product query
-    prod_query = select(Product)
+    prod_query = select(Product).where(Product.owner_id == current_user.inventory_owner_id)
     if category_id:
         prod_query = prod_query.where(Product.category_id == category_id)
 
@@ -41,9 +41,10 @@ async def get_dashboard_kpis(
         q_stmt = (
             select(func.coalesce(func.sum(StockQuant.on_hand), Decimal("0.00")))
             .join(Location, StockQuant.location_id == Location.id)
+            .join(Warehouse, Location.warehouse_id == Warehouse.id)
             .where(
                 StockQuant.product_id == p.id,
-                Location.type == "INTERNAL"
+                Location.type == "INTERNAL", Warehouse.owner_id == current_user.inventory_owner_id
             )
         )
         if warehouse_id:
@@ -82,6 +83,7 @@ async def get_dashboard_kpis(
     # 3. Operations counts
     # Receipts pending (DRAFT, WAITING, READY)
     rec_stmt = select(func.count(StockOperation.id)).where(
+        StockOperation.owner_id == current_user.inventory_owner_id,
         StockOperation.operation_type == "RECEIPT",
         StockOperation.status.in_(["DRAFT", "WAITING", "READY"])
     )
@@ -93,6 +95,7 @@ async def get_dashboard_kpis(
 
     # Deliveries pending (WAITING, READY)
     del_stmt = select(func.count(StockOperation.id)).where(
+        StockOperation.owner_id == current_user.inventory_owner_id,
         StockOperation.operation_type == "DELIVERY",
         StockOperation.status.in_(["WAITING", "READY"])
     )
@@ -104,6 +107,7 @@ async def get_dashboard_kpis(
 
     # Transfers pending (DRAFT, WAITING, READY)
     trans_stmt = select(func.count(StockOperation.id)).where(
+        StockOperation.owner_id == current_user.inventory_owner_id,
         StockOperation.operation_type == "INTERNAL",
         StockOperation.status.in_(["DRAFT", "WAITING", "READY"])
     )
@@ -118,6 +122,8 @@ async def get_dashboard_kpis(
     # 4. Recent activities (latest 8 ledger entries)
     act_stmt = (
         select(StockLedger)
+        .join(StockOperation, StockLedger.operation_id == StockOperation.id)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockLedger.operation),
             selectinload(StockLedger.product),

@@ -26,6 +26,7 @@ async def test_simultaneous_deliveries_concurrency_lock(test_db, seed_data):
 
     # 1. Seed initial stock of exactly 10 units
     op_init = StockOperation(
+        owner_id=manager.id,
         reference="WH1/IN/CONCURRENCY-INIT",
         operation_type="RECEIPT",
         source_location_id=loc_vendor.id,
@@ -55,20 +56,22 @@ async def test_simultaneous_deliveries_concurrency_lock(test_db, seed_data):
 
     # Create operations for both deliveries
     op1 = StockOperation(
+        owner_id=manager.id,
         reference="WH1/OUT/CONCUR-01",
         operation_type="DELIVERY",
         source_location_id=loc_stock.id,
         destination_location_id=loc_customer.id,
         status="READY",
-        created_by=staff.id
+        created_by=manager.id
     )
     op2 = StockOperation(
+        owner_id=manager.id,
         reference="WH1/OUT/CONCUR-02",
         operation_type="DELIVERY",
         source_location_id=loc_stock.id,
         destination_location_id=loc_customer.id,
         status="READY",
-        created_by=staff.id
+        created_by=manager.id
     )
     test_db.add_all([op1, op2])
     await test_db.commit()
@@ -84,7 +87,7 @@ async def test_simultaneous_deliveries_concurrency_lock(test_db, seed_data):
                     to_location_id=loc_customer.id,
                     quantity=Decimal("7.00"),
                     operation_id=op_id,
-                    user_id=staff.id,
+                    user_id=manager.id,
                     allow_negative_stock=False,
                     is_manager=False
                 )

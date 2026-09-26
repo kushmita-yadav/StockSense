@@ -12,22 +12,28 @@ router = APIRouter(tags=["WebSocket Alerts"])
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: dict[uuid.UUID, List[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, owner_id: uuid.UUID):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections.setdefault(owner_id, []).append(websocket)
 
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
+    def disconnect(self, websocket: WebSocket, owner_id: uuid.UUID):
+        connections = self.active_connections.get(owner_id, [])
+        if websocket in connections:
+            connections.remove(websocket)
+        if not connections:
+            self.active_connections.pop(owner_id, None)
 
     async def broadcast(self, message: dict):
-        for connection in list(self.active_connections):
+        owner_id = uuid.UUID(message["owner_id"]) if message.get("owner_id") else None
+        if owner_id is None:
+            return
+        for connection in list(self.active_connections.get(owner_id, [])):
             try:
                 await connection.send_json(message)
             except Exception:
-                self.disconnect(connection)
+                self.disconnect(connection, owner_id)
 
 ws_manager = ConnectionManager()
 
@@ -50,7 +56,7 @@ async def websocket_alerts_endpoint(websocket: WebSocket):
         await websocket.close(code=4401, reason="Authentication required")
         return
 
-    await ws_manager.connect(websocket)
+    await ws_manager.connect(websocket, user.inventory_owner_id)
     try:
         # Send initial connection acknowledgment
         await websocket.send_json({"type": "CONNECTED", "message": "Connected to StockSense live event stream."})
@@ -60,6 +66,6 @@ async def websocket_alerts_endpoint(websocket: WebSocket):
             if data == "ping":
                 await websocket.send_text("pong")
     except WebSocketDisconnect:
-        ws_manager.disconnect(websocket)
+        ws_manager.disconnect(websocket, user.inventory_owner_id)
     except Exception:
-        ws_manager.disconnect(websocket)
+        ws_manager.disconnect(websocket, user.inventory_owner_id)

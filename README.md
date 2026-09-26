@@ -10,7 +10,7 @@ StockSense is an inventory management system for tracking products, warehouses, 
 - Supports receipts, deliveries, internal transfers, adjustments, and reorder drafts.
 - Routes stock changes through one ledger engine; current per-location balances are derived from ledger movements.
 - Shows dashboard KPIs, reorder alerts, product stock by location, operations, and paginated movement history.
-- Provides manager/staff UI states, HTTP API authentication, role checks, and OTP password reset.
+- Provides manager/staff UI states, HTTP API authentication, role checks, OTP-verified signup, and OTP password reset.
 - Broadcasts committed stock movements to connected browser clients and invalidates their cached data.
 
 ## Stack
@@ -21,7 +21,7 @@ StockSense is an inventory management system for tracking products, warehouses, 
 | API | FastAPI, Pydantic, SQLAlchemy async |
 | Database | SQLite for local development; PostgreSQL via `asyncpg` is supported by configuration |
 | Schema | Alembic migrations |
-| Authentication | JWT, Argon2 password hashing, HttpOnly session cookie, OTP reset |
+| Authentication | JWT, Argon2 password hashing, HttpOnly session cookie, OTP-verified signup and password reset |
 | Live updates | FastAPI WebSocket alerts |
 
 ## Repository Layout
@@ -80,11 +80,11 @@ Development demo accounts are seeded only outside production:
 | Inventory Manager | `manager@stocksense.com` | `Manager@12345` |
 | Warehouse Staff | `staff@stocksense.com` | `Staff@12345` |
 
-These are public demo credentials. Never use them for a deployed system.
+These are public demo credentials. Never use them for a deployed system. The demo manager and staff have distinct sample warehouses, products, inventory balances, completed ledger movements, and open work items. A manager can create a workspace invite from the dashboard; staff who sign up with that code share its inventory and live updates. New signups without a code start with an empty, private workspace.
 
 ## Configuration
 
-Copy `backend/.env.example` to `backend/.env` for local settings. The default database is `sqlite+aiosqlite:///./stocksense.db`, relative to the backend working directory.
+Copy `backend/.env.example` to `backend/.env` for local settings. The backend also checks a project-root `.env`, independent of the launch directory. The default database is `sqlite+aiosqlite:///./stocksense.db`, relative to the backend working directory. To enable the dashboard assistant, add your own `GROQ_API_KEY` to `backend/.env` or the project-root `.env`; its default model is `openai/gpt-oss-20b`. The key stays on the backend and is never sent to the browser. Without a key, the assistant reports that it is not configured.
 
 Production requires all of the following before startup:
 
@@ -97,13 +97,27 @@ Production requires all of the following before startup:
 
 The application rejects unsafe production defaults. Apply Alembic migrations before deployment; production startup intentionally does not create tables or seed demo accounts. Do not commit `.env` files or real credentials.
 
+## Deploy on Render
+
+The repository includes a root [`render.yaml`](render.yaml) Blueprint for a FastAPI web service, a static Vite site, and managed PostgreSQL. It runs `alembic upgrade head` as a pre-deploy command, so the API service uses a paid compute plan; the smallest database plan is also paid. Review Render's current pricing before creating the Blueprint.
+
+1. Push the repository to GitHub and connect it to Render.
+2. In Render, choose **New + → Blueprint**, select this repository and branch, then apply `render.yaml`.
+3. During Blueprint setup, provide SMTP host, username/password (both blank only if your SMTP provider does not use authentication), and a verified sender address. Production startup requires working SMTP settings.
+4. After the services are created, check the API `/health` route and the frontend URL from the Render Dashboard. The Blueprint configures the frontend to call `https://stocksense-api.onrender.com` and only allows the matching frontend origin.
+5. To enable the workspace assistant, add `GROQ_API_KEY` to the API service's Environment page. Never put it in `render.yaml`, the frontend, or a committed `.env.example`.
+
+Render's free static sites are suitable for a demo, but a free Postgres database is limited to 1 GB and expires after 30 days; free web services sleep when idle, and free web services cannot send SMTP traffic over ports 25, 465, or 587. This Blueprint uses paid API/database plans so migrations, persistent inventory, and SMTP can work. See [Render's free instance limits](https://render.com/docs/free) before changing plans.
+
+Keep the API at one instance for now: WebSocket connections and broadcasts are held in process memory. Scaling to multiple API instances requires a shared pub/sub service so a movement handled by one instance reaches clients connected to another.
+
 ## API Overview
 
 All REST routes are under `/api/v1`:
 
 | Resource | Routes / capabilities |
 |----------|-----------------------|
-| Authentication | Signup, login, logout, current user, request OTP, reset password |
+| Authentication | Signup, verify signup OTP, login, logout, current user, workspace staff invites, request OTP, reset password |
 | Products | List/search/filter, create/update, categories, reorder check |
 | Warehouses | List/create warehouses and locations |
 | Operations | Receipts, deliveries, transfers, adjustments, status advancement, validation |
@@ -130,7 +144,7 @@ npm run build
 npm run lint
 ```
 
-Last verified locally: 12 backend tests passed; the TypeScript/production frontend build passed; an authenticated manager receipt reached a separate staff browser over WebSocket. PostgreSQL migration SQL was compiled offline, but a live PostgreSQL server was not available for an online migration or test run.
+Last verified locally: 16 backend tests passed; the TypeScript/production frontend build passed; an authenticated manager receipt reached a separate staff browser over WebSocket. PostgreSQL migration SQL was compiled offline, but a live PostgreSQL server was not available for an online migration or test run.
 
 ## Current Limitations
 

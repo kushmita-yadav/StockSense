@@ -62,7 +62,7 @@ async def _build_operation_response(op: StockOperation, db: AsyncSession) -> Sto
         lines=lines_resp
     )
 
-async def _generate_reference(db: AsyncSession, op_type: str, wh_code: str = "WH1") -> str:
+async def _generate_reference(db: AsyncSession, op_type: str, owner_id: uuid.UUID, wh_code: str = "WH1") -> str:
     type_code = {
         "RECEIPT": "IN",
         "DELIVERY": "OUT",
@@ -71,7 +71,7 @@ async def _generate_reference(db: AsyncSession, op_type: str, wh_code: str = "WH
     }.get(op_type, "OP")
 
     count_res = await db.execute(
-        select(func.count(StockOperation.id)).where(StockOperation.operation_type == op_type)
+        select(func.count(StockOperation.id)).where(StockOperation.owner_id == owner_id, StockOperation.operation_type == op_type)
     )
     next_num = count_res.scalar_one() + 1
     return f"{wh_code}/{type_code}/{next_num:04d}"
@@ -87,6 +87,7 @@ async def list_operations(
 ):
     query = (
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
@@ -95,6 +96,7 @@ async def list_operations(
         )
     )
 
+    query = query.where(StockOperation.owner_id == current_user.inventory_owner_id)
     if operation_type:
         query = query.where(StockOperation.operation_type == operation_type.upper())
     if status:
@@ -130,9 +132,9 @@ async def create_operation(
 ):
     ref = op_in.reference
     if not ref:
-        ref = await _generate_reference(db, op_in.operation_type)
+        ref = await _generate_reference(db, op_in.operation_type, current_user.inventory_owner_id)
 
-    existing = await db.execute(select(StockOperation).where(StockOperation.reference == ref))
+    existing = await db.execute(select(StockOperation).where(StockOperation.owner_id == current_user.inventory_owner_id, StockOperation.reference == ref))
     if existing.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -145,7 +147,20 @@ async def create_operation(
             detail="Reason code is required for ADJUSTMENT operations (DAMAGED, MISCOUNT, THEFT, OTHER)."
         )
 
+    location_ids = {value for value in (op_in.source_location_id, op_in.destination_location_id) if value}
+    if location_ids:
+        owned_locations = set((await db.scalars(
+            select(Location.id).join(Warehouse).where(Location.id.in_(location_ids), Warehouse.owner_id == current_user.inventory_owner_id)
+        )).all())
+        if owned_locations != location_ids:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or more locations were not found in your workspace.")
+    product_ids = {line.product_id for line in op_in.lines}
+    owned_products = set((await db.scalars(select(Product.id).where(Product.id.in_(product_ids), Product.owner_id == current_user.inventory_owner_id))).all())
+    if owned_products != product_ids:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or more products were not found in your workspace.")
+
     op = StockOperation(
+        owner_id=current_user.inventory_owner_id,
         reference=ref,
         operation_type=op_in.operation_type,
         source_location_id=op_in.source_location_id,
@@ -174,13 +189,14 @@ async def create_operation(
     # Re-fetch with relationships
     res = await db.execute(
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
             selectinload(StockOperation.destination_location),
             selectinload(StockOperation.creator)
         )
-        .where(StockOperation.id == op.id)
+        .where(StockOperation.id == op.id, StockOperation.owner_id == current_user.inventory_owner_id)
     )
     return await _build_operation_response(res.scalar_one(), db)
 
@@ -192,6 +208,7 @@ async def get_operation(
 ):
     res = await db.execute(
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
@@ -218,6 +235,7 @@ async def advance_status(
     """
     res = await db.execute(
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
@@ -343,6 +361,7 @@ async def validate_operation(
     """
     res = await db.execute(
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
@@ -416,6 +435,7 @@ async def validate_operation(
                 quantity=qty,
                 operation_id=op.id,
                 user_id=current_user.id,
+                workspace_owner_id=current_user.inventory_owner_id,
                 allow_negative_stock=val_in.allow_negative_stock,
                 is_manager=is_manager,
                 commit=False
@@ -463,11 +483,11 @@ async def create_quick_adjustment(
     If delta > 0: LOSS_VIRTUAL -> location.
     If delta < 0: location -> LOSS_VIRTUAL.
     """
-    loc = await db.get(Location, adj_in.location_id)
+    loc = await db.scalar(select(Location).join(Warehouse).where(Location.id == adj_in.location_id, Warehouse.owner_id == current_user.inventory_owner_id))
     if not loc or loc.type != "INTERNAL":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Adjustment location must be an INTERNAL warehouse location.")
 
-    product = await db.get(Product, adj_in.product_id)
+    product = await db.scalar(select(Product).where(Product.id == adj_in.product_id, Product.owner_id == current_user.inventory_owner_id))
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
 
@@ -496,7 +516,7 @@ async def create_quick_adjustment(
     if delta == Decimal("0.00"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Counted quantity matches recorded balance. No adjustment needed.")
 
-    ref = await _generate_reference(db, "ADJUSTMENT")
+    ref = await _generate_reference(db, "ADJUSTMENT", current_user.inventory_owner_id)
 
     # If delta > 0 (gain): from loss_loc to loc
     # If delta < 0 (loss): from loc to loss_loc
@@ -510,6 +530,7 @@ async def create_quick_adjustment(
         qty_to_move = abs(delta)
 
     op = StockOperation(
+        owner_id=current_user.inventory_owner_id,
         reference=ref,
         operation_type="ADJUSTMENT",
         source_location_id=source_loc_id,
@@ -541,6 +562,7 @@ async def create_quick_adjustment(
         quantity=qty_to_move,
         operation_id=op.id,
         user_id=current_user.id,
+        workspace_owner_id=current_user.inventory_owner_id,
         allow_negative_stock=False,
         is_manager=is_manager,
         commit=False
@@ -553,13 +575,14 @@ async def create_quick_adjustment(
 
     res = await db.execute(
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
             selectinload(StockOperation.destination_location),
             selectinload(StockOperation.creator)
         )
-        .where(StockOperation.id == op.id)
+        .where(StockOperation.id == op.id, StockOperation.owner_id == current_user.inventory_owner_id)
     )
     return await _build_operation_response(res.scalar_one(), db)
 
@@ -576,17 +599,18 @@ async def create_quick_transfer(
     if trans_in.from_location_id == trans_in.to_location_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Source and destination locations cannot be identical.")
 
-    from_loc = await db.get(Location, trans_in.from_location_id)
-    to_loc = await db.get(Location, trans_in.to_location_id)
+    from_loc = await db.scalar(select(Location).join(Warehouse).where(Location.id == trans_in.from_location_id, Warehouse.owner_id == current_user.inventory_owner_id))
+    to_loc = await db.scalar(select(Location).join(Warehouse).where(Location.id == trans_in.to_location_id, Warehouse.owner_id == current_user.inventory_owner_id))
     if not from_loc or not to_loc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or both locations not found.")
 
-    product = await db.get(Product, trans_in.product_id)
+    product = await db.scalar(select(Product).where(Product.id == trans_in.product_id, Product.owner_id == current_user.inventory_owner_id))
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
 
-    ref = await _generate_reference(db, "INTERNAL")
+    ref = await _generate_reference(db, "INTERNAL", current_user.inventory_owner_id)
     op = StockOperation(
+        owner_id=current_user.inventory_owner_id,
         reference=ref,
         operation_type="INTERNAL",
         source_location_id=trans_in.from_location_id,
@@ -617,6 +641,7 @@ async def create_quick_transfer(
         quantity=trans_in.quantity,
         operation_id=op.id,
         user_id=current_user.id,
+        workspace_owner_id=current_user.inventory_owner_id,
         allow_negative_stock=False,
         is_manager=is_manager,
         commit=False
@@ -629,12 +654,13 @@ async def create_quick_transfer(
 
     res = await db.execute(
         select(StockOperation)
+        .where(StockOperation.owner_id == current_user.inventory_owner_id)
         .options(
             selectinload(StockOperation.lines),
             selectinload(StockOperation.source_location),
             selectinload(StockOperation.destination_location),
             selectinload(StockOperation.creator)
         )
-        .where(StockOperation.id == op.id)
+        .where(StockOperation.id == op.id, StockOperation.owner_id == current_user.inventory_owner_id)
     )
     return await _build_operation_response(res.scalar_one(), db)

@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import { Boxes, Eye, EyeOff, Mail, Lock, User, Shield, ArrowRight, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
-type Mode = 'login' | 'signup' | 'otp_request' | 'otp_verify' | 'otp_new_password'
+type Mode = 'login' | 'signup' | 'signup_verify' | 'otp_request' | 'otp_verify' | 'otp_new_password'
 
 export const LoginPage: React.FC = () => {
-  const { login, signup, requestOTP, resetPassword } = useAuth()
+  const { login, signup, verifySignup, requestOTP, resetPassword } = useAuth()
 
   const [mode, setMode] = useState<Mode>('login')
   const [loading, setLoading] = useState(false)
@@ -17,6 +17,7 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [otpCode, setOtpCode] = useState('')
   const [otpDebug, setOtpDebug] = useState<string | null>(null)
@@ -52,12 +53,26 @@ export const LoginPage: React.FC = () => {
     }
     setLoading(true)
     try {
-      await signup(name.trim(), email.trim(), password)
+      const result = await signup(name.trim(), email.trim(), password, inviteCode.trim() || undefined)
+      setSuccess(result.message || 'Verification code sent to your email.')
+      setOtpDebug(result.otp_debug || null)
+      setOtpCode(result.otp_debug || '')
+      setMode('signup_verify')
     } catch (err: any) {
       setError(err.message || 'Signup failed. Please try again.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleVerifySignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    clearState()
+    if (!/^\d{6}$/.test(otpCode)) { setError('Enter the 6-digit code sent to your email.'); return }
+    setLoading(true)
+    try { await verifySignup(email.trim(), otpCode.trim()) }
+    catch (err: any) { setError(err.message || 'Verification failed. Check your code and try again.') }
+    finally { setLoading(false) }
   }
 
   const handleRequestOTP = async (e: React.FormEvent) => {
@@ -206,13 +221,15 @@ export const LoginPage: React.FC = () => {
               <h2 className="font-heading text-2xl font-extrabold text-ink">
                 {mode === 'login' && 'Welcome back'}
                 {mode === 'signup' && 'Create account'}
+                {mode === 'signup_verify' && 'Verify your email'}
                 {mode === 'otp_request' && 'Reset password'}
                 {mode === 'otp_verify' && 'Verify your email'}
                 {mode === 'otp_new_password' && 'Choose a new password'}
               </h2>
               <p className="text-sm text-muted mt-1">
                 {mode === 'login' && 'Sign in to your StockSense account'}
-                {mode === 'signup' && 'Set up your inventory access'}
+                {mode === 'signup' && 'Create your own inventory workspace'}
+                {mode === 'signup_verify' && 'Enter the 6-digit code to activate your account'}
                 {mode === 'otp_request' && 'Enter your email to receive a one-time code'}
                 {mode === 'otp_verify' && 'Enter the 6-digit code sent to your email'}
                 {mode === 'otp_new_password' && 'Set a new password for your account'}
@@ -228,6 +245,15 @@ export const LoginPage: React.FC = () => {
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-clay-700" />
                 {error}
               </div>
+            )}
+            {mode === 'signup' && error?.toLowerCase().includes('workspace invite code') && (
+              <button
+                type="button"
+                onClick={() => { setInviteCode(''); clearState() }}
+                className="-mt-3 mb-4 text-xs font-semibold text-brand-700 hover:underline"
+              >
+                Clear invite code and create a private workspace
+              </button>
             )}
             {success && (
               <div
@@ -322,28 +348,29 @@ export const LoginPage: React.FC = () => {
                   }
                 </button>
 
-                {/* Demo credentials */}
-                <div className="p-3.5 rounded-xl bg-surface/60 border border-biscuit text-xs space-y-1.5">
-                  <p className="text-muted font-semibold text-[11px] uppercase tracking-wide">Demo Credentials</p>
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('manager@stocksense.com'); setPassword('Manager@12345') }}
-                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-biscuit text-brand-700 transition-colors"
-                  >
-                    <Shield className="w-3 h-3 text-brand-700" />
-                    Inventory Manager
-                    <span className="ml-auto text-muted font-mono text-[10px]">Manager@12345</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('staff@stocksense.com'); setPassword('Staff@12345') }}
-                    className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-biscuit text-sage-700 transition-colors"
-                  >
-                    <User className="w-3 h-3 text-sage-700" />
-                    Warehouse Staff
-                    <span className="ml-auto text-muted font-mono text-[10px]">Staff@12345</span>
-                  </button>
-                </div>
+                {import.meta.env.DEV && (
+                  <div className="p-3.5 rounded-xl bg-surface/60 border border-biscuit text-xs space-y-1.5">
+                    <p className="text-muted font-semibold text-[11px] uppercase tracking-wide">Demo Credentials</p>
+                    <button
+                      type="button"
+                      onClick={() => { setEmail('manager@stocksense.com'); setPassword('Manager@12345') }}
+                      className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-biscuit text-brand-700 transition-colors"
+                    >
+                      <Shield className="w-3 h-3 text-brand-700" />
+                      Inventory Manager
+                      <span className="ml-auto text-muted font-mono text-[10px]">Manager@12345</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEmail('staff@stocksense.com'); setPassword('Staff@12345') }}
+                      className="w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-biscuit text-sage-700 transition-colors"
+                    >
+                      <User className="w-3 h-3 text-sage-700" />
+                      Warehouse Staff
+                      <span className="ml-auto text-muted font-mono text-[10px]">Staff@12345</span>
+                    </button>
+                  </div>
+                )}
               </form>
             )}
 
@@ -383,7 +410,19 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-xs text-muted">New accounts start with warehouse staff access. Contact your system administrator to request manager access.</p>
+                <p className="text-xs text-muted">This is a manager’s workspace invite code, not the email OTP. Leave it blank to create a private workspace. To join a team, ask its manager for a current code from the dashboard.</p>
+
+                <div>
+                  <label htmlFor="signup-invite" className="block text-xs font-semibold text-ink mb-1.5">Workspace Invite Code <span className="font-normal text-muted">(optional)</span></label>
+                  <input
+                    id="signup-invite"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                    placeholder="Join a manager's workspace"
+                    autoComplete="off"
+                    className={inputCls}
+                  />
+                </div>
 
                 <div>
                   <label htmlFor="signup-password" className="block text-xs font-semibold text-ink mb-1.5">Password</label>
@@ -436,6 +475,20 @@ export const LoginPage: React.FC = () => {
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Creating account…</>
                     : <><ArrowRight className="w-4 h-4" /> Create Account</>
                   }
+                </button>
+              </form>
+            )}
+
+            {mode === 'signup_verify' && (
+              <form onSubmit={handleVerifySignup} className="space-y-4">
+                <label htmlFor="signup-otp" className="block text-xs font-semibold text-ink mb-1.5">6-Digit Verification Code</label>
+                <input id="signup-otp" type="text" inputMode="numeric" maxLength={6} value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} required
+                  className={`${inputCls} text-center tracking-[0.5rem] text-xl font-mono font-bold`} />
+                {otpDebug && <p className="text-xs text-muted">Development verification code: <strong>{otpDebug}</strong></p>}
+                <button type="submit" disabled={loading || otpCode.length !== 6}
+                  className="w-full py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-brand-600 to-brand-500 disabled:opacity-60">
+                  {loading ? 'Verifying…' : 'Verify and open inventory'}
                 </button>
               </form>
             )}
