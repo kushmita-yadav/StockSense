@@ -239,6 +239,18 @@ async def advance_status(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"No next status is available for an operation in {op.status}."
         )
+    allowed_targets = {
+        "DRAFT": {"WAITING", "READY", "CANCELED"},
+        "WAITING": {"READY", "CANCELED"},
+        "READY": {"CANCELED"},
+        "DONE": set(),
+        "CANCELED": set(),
+    }
+    if target not in allowed_targets.get(op.status, set()):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot move an operation from {op.status} to {target}."
+        )
     if op.status == "DONE":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Operation is already completed.")
 
@@ -250,9 +262,15 @@ async def advance_status(
                     select(StockQuant).where(
                         StockQuant.product_id == line.product_id,
                         StockQuant.location_id == op.source_location_id
-                    )
+                    ).with_for_update()
                 )
                 quant = q_res.scalar_one_or_none()
+                available = (quant.on_hand - quant.reserved) if quant else Decimal("0.00")
+                if available < line.quantity_demanded:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Insufficient available stock to reserve delivery. Available: {available}, Requested: {line.quantity_demanded}"
+                    )
                 if quant:
                     quant.reserved += line.quantity_demanded
                 else:
@@ -273,9 +291,15 @@ async def advance_status(
                     select(StockQuant).where(
                         StockQuant.product_id == line.product_id,
                         StockQuant.location_id == op.source_location_id
-                    )
+                    ).with_for_update()
                 )
                 quant = q_res.scalar_one_or_none()
+                available = (quant.on_hand - quant.reserved) if quant else Decimal("0.00")
+                if available < line.quantity_demanded:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Insufficient available stock to reserve delivery. Available: {available}, Requested: {line.quantity_demanded}"
+                    )
                 if quant:
                     quant.reserved += line.quantity_demanded
                 else:
@@ -337,16 +361,31 @@ async def validate_operation(
     if op.status == "CANCELED":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot validate a canceled operation.")
 
+    if not op.lines:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot validate an operation with no lines.")
+
     is_manager = (current_user.role == "INVENTORY_MANAGER")
 
     # Determine quantities to execute
     done_quantities = {}
     if val_in.lines:
+        input_product_ids = [item.product_id for item in val_in.lines]
+        if len(input_product_ids) != len(set(input_product_ids)):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Validation can include each product only once.")
         for item in val_in.lines:
+            if item.product_id not in {line.product_id for line in op.lines}:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Validation includes a product that is not on this operation.")
             done_quantities[item.product_id] = item.quantity_done
     else:
         for line in op.lines:
             done_quantities[line.product_id] = line.quantity_demanded
+
+    for line in op.lines:
+        quantity_done = done_quantities.get(line.product_id, line.quantity_demanded)
+        if quantity_done > line.quantity_demanded:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Quantity done cannot exceed quantity demanded.")
+    if not any(quantity > Decimal("0.00") for quantity in done_quantities.values()):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one operation line must have a positive completed quantity.")
 
     try:
         # If this is a DELIVERY and items were reserved, release reservations before executing movement

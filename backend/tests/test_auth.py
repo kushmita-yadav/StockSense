@@ -12,11 +12,15 @@ async def test_signup_and_login(client: AsyncClient, test_db):
         "password": "Password123!",
         "role": "INVENTORY_MANAGER"
     }
+    manager_signup_resp = await client.post("/api/v1/auth/signup", json=signup_payload)
+    assert manager_signup_resp.status_code == 403
+
+    signup_payload["role"] = "WAREHOUSE_STAFF"
     signup_resp = await client.post("/api/v1/auth/signup", json=signup_payload)
     assert signup_resp.status_code == 201
     user_data = signup_resp.json()
     assert user_data["email"] == "jane@example.com"
-    assert user_data["role"] == "INVENTORY_MANAGER"
+    assert user_data["role"] == "WAREHOUSE_STAFF"
 
     # 2. Duplicate signup fails
     dup_resp = await client.post("/api/v1/auth/signup", json=signup_payload)

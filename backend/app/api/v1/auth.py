@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(user_in: SignupRequest, db: AsyncSession = Depends(get_db)):
+    if user_in.role != "WAREHOUSE_STAFF":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Public signup creates warehouse staff accounts only. Contact your system administrator to request manager access."
+        )
     # Check if user already exists
     existing = await db.execute(select(User).where(User.email == user_in.email.lower()))
     if existing.scalar_one_or_none():
@@ -49,7 +54,7 @@ async def signup(user_in: SignupRequest, db: AsyncSession = Depends(get_db)):
         name=user_in.name.strip(),
         email=user_in.email.lower(),
         password_hash=pwd_hash,
-        role=user_in.role,
+        role="WAREHOUSE_STAFF",
         is_active=True
     )
     db.add(new_user)

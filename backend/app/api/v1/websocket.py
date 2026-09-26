@@ -1,6 +1,12 @@
 import asyncio
 from typing import List
+import uuid
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from sqlalchemy import select
+from app.core.config import settings
+from app.core.database import AsyncSessionLocal
+from app.core.security import decode_access_token
+from app.models.user import User
 
 router = APIRouter(tags=["WebSocket Alerts"])
 
@@ -27,6 +33,23 @@ ws_manager = ConnectionManager()
 
 @router.websocket("/ws/alerts")
 async def websocket_alerts_endpoint(websocket: WebSocket):
+    token = websocket.cookies.get(settings.COOKIE_NAME)
+    payload = decode_access_token(token) if token else None
+    try:
+        user_id = uuid.UUID(payload.get("sub", "")) if payload else None
+    except (ValueError, AttributeError):
+        user_id = None
+
+    if user_id is None:
+        await websocket.close(code=4401, reason="Authentication required")
+        return
+
+    async with AsyncSessionLocal() as db:
+        user = await db.scalar(select(User).where(User.id == user_id, User.is_active.is_(True)))
+    if user is None:
+        await websocket.close(code=4401, reason="Authentication required")
+        return
+
     await ws_manager.connect(websocket)
     try:
         # Send initial connection acknowledgment

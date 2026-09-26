@@ -2,7 +2,7 @@ import uuid
 from decimal import Decimal
 from datetime import datetime
 from typing import Optional, List, Literal
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 class OperationLineCreate(BaseModel):
     product_id: uuid.UUID
@@ -28,7 +28,14 @@ class StockOperationCreate(BaseModel):
     contact_name: Optional[str] = None
     reason_code: Optional[Literal["DAMAGED", "MISCOUNT", "THEFT", "OTHER"]] = None
     scheduled_date: Optional[datetime] = None
-    lines: List[OperationLineCreate] = []
+    lines: List[OperationLineCreate] = Field(..., min_length=1)
+
+    @model_validator(mode="after")
+    def product_lines_must_be_unique(self):
+        product_ids = [line.product_id for line in self.lines]
+        if len(product_ids) != len(set(product_ids)):
+            raise ValueError("An operation can contain each product only once.")
+        return self
 
 class StockOperationUpdate(BaseModel):
     contact_name: Optional[str] = None

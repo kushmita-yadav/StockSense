@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User, UserRole } from '../types';
+import type { User } from '../types';
 import { api } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  signup: (name: string, email: string, password: string, role: UserRole) => Promise<User>;
+  signup: (name: string, email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   requestOTP: (email: string) => Promise<{ message: string; otp_debug?: string }>;
   resetPassword: (email: string, otp_code: string, new_password: string) => Promise<void>;
@@ -50,10 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (
     name: string,
     email: string,
-    password: string,
-    role: UserRole
+    password: string
   ): Promise<User> => {
-    await api.post<User>('/auth/signup', { name, email, password, role });
+    await api.post<User>('/auth/signup', { name, email, password, role: 'WAREHOUSE_STAFF' });
     // Automatically log in after signup
     return await login(email, password);
   };

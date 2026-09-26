@@ -136,11 +136,9 @@ Last verified locally: 12 backend tests passed; the TypeScript/production fronte
 
 This is a working prototype, not a production-ready inventory service. Before exposing it to the internet:
 
-1. **Restrict account roles.** Public signup currently accepts `INVENTORY_MANAGER`; a user can self-register with manager privileges. Replace this with staff-only signup plus a secure manager invitation/bootstrap flow.
-2. **Authenticate WebSocket clients.** `/api/v1/ws/alerts` currently accepts unauthenticated connections and broadcasts movement metadata. Require a valid session and test rejected connections.
-3. Configure a real SMTP provider and verify mail delivery. Development-only `otp_debug` is not returned outside development.
-4. Run Alembic migrations and the full suite against a real PostgreSQL test database; SQLite does not verify PostgreSQL row-lock behavior.
-5. Add frontend interaction tests, broader API authorization tests, dependency scanning, and load testing before a real deployment.
+1. Configure a real SMTP provider and verify mail delivery. Development-only `otp_debug` is not returned outside development.
+2. Run Alembic migrations and the full suite against a real PostgreSQL test database; SQLite does not verify PostgreSQL row-lock behavior.
+3. Add frontend interaction tests, broader API authorization tests, dependency scanning, and load testing before a real deployment.
 
 The local browser check created a one-unit demo receipt (`WH1/IN/0005`) in the ignored SQLite database; it is not part of a fresh clone or GitHub history.
 

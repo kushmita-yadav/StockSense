@@ -112,15 +112,16 @@ class LedgerEngine:
                 quant_from = res.scalar_one_or_none()
 
                 current_on_hand = quant_from.on_hand if quant_from else Decimal("0.00")
+                available_stock = current_on_hand - (quant_from.reserved if quant_from else Decimal("0.00"))
 
-                if current_on_hand < quantity:
+                if available_stock < quantity:
                     if not (allow_negative_stock and is_manager):
                         raise InsufficientStockException(
                             f"Insufficient stock for product at location '{from_loc.name}'. "
-                            f"Available: {current_on_hand}, Requested: {quantity}",
+                            f"Available: {available_stock}, Requested: {quantity}",
                             product_id=product_id,
                             location_id=from_location_id,
-                            available=current_on_hand,
+                            available=available_stock,
                             requested=quantity
                         )
 
